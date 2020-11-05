@@ -44,7 +44,7 @@ BOOL CAPMSUSPENDApp::InitInstance()
 {
 	m_hMutex = CreateMutex(FALSE, 0, _T("CAPMSUSPENDApp"));
 
-	// 起動していたらすぐに終了させる
+	// 複数のプロセスの起動を禁止する。起動していたらすぐに終了させる
 	if (::GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		CloseHandle(m_hMutex);

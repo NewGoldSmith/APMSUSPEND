@@ -87,11 +87,6 @@ public:
 protected:
 	DECLARE_MESSAGE_MAP()
 public:
-//	afx_msg UINT OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData);
-protected:
-//	CFileDialog* m_pDlg;
-public:
-//	afx_msg void OnIdrMenuMain();
 	virtual BOOL OnInitDialog();
 };
 
