@@ -37,28 +37,28 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg UINT OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData);
-	afx_msg void OnBnClickedButtonOpenPath();
+	afx_msg void OnBnClickedButtonGetPath();
 	afx_msg void OnBnClickedButtonCreateProcess();
 	PROCESS_INFORMATION m_PI;
 public:
 	afx_msg void OnBnClickedButtonCloseProcess();
 protected:
 	static UINT Call_Target_end_detect(LPVOID p);
-	CWinThread * m_pThread;
+	CWinThread * mp_cThread_Detect_End;
 public:
-	CSemaphore m_sem;
-	CSemaphore m_sm_Callback_Alive;
+	CSemaphore m_cSem;
+	CSemaphore m_cSem_Callback_Alive;
 protected:
-	CString m_Target_path;
+	CString m_str_Target_path;
 public:
 	virtual BOOL DestroyWindow();
-	BOOL m_radiko_support_on;
-	int m_Radiko_is_startup;
-	BOOL m_is_state_save;
+	BOOL m_b_safe_suspend_support_on;
+	int m_i_Radiko_is_startup;
+	BOOL m_b_restore_previous_target_startup_state;
 private:
 	void CreateTargetProcess();
 protected:
-	bool m_IsHide;
+	BOOL m_b_IsHide;
 public:
 	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);
 protected:
@@ -66,7 +66,7 @@ protected:
 public:
 	bool TrayNotifyIcon(DWORD dwMessage);
 	afx_msg void OnDestroy();
-	int m_show_dlg_state;
+	int m_i_show_maindlg_state;
 	afx_msg void OnAppShow();
 	afx_msg void OnAppIcon();
 	afx_msg void OnAppClose();
@@ -74,36 +74,46 @@ public:
 	afx_msg void OnRadikoStartUp();
 	afx_msg void OnRadikoClose();
 	afx_msg void OnBnClickedOk();
-	BOOL m_use_task_tray;
+	BOOL m_b_use_task_tray;
 	afx_msg void OnClickedCheckUseTaskTray();
 	afx_msg void OnBnClickedButtonDoTasktray();
-	CButton m_check_use_tasktray;
-	CButton m_check_radiko_suport_on;
+	CButton m_ctlButton_check_use_tasktray;
+	CButton m_ctlButton_check_radiko_suport_on;
 private:
-	CStatic m_static_target_path;
+	CStatic m_ctlStatic_Target_path;
 public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnAppCancel();
-	void PowerLampON();
-	afx_msg void OnClickedStaticPictureControlPowerIndigate();
-	void PowerLampOff();
 	int m_is_power_state;
-	CStaticBmpControl m_DlgItem_Powerlamp;
+	CStaticBmpControl m_ctlImgCtl_Powerlamp;
 public:
-	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual void Dump(CDumpContext& dc) const;
-	BOOL m_Radiko_had_startup;
-//	BOOL m_thread_is_alive;
+	BOOL m_b_Radiko_had_startup;
 	afx_msg void OnBnClickedButtonTestSuspend();
 	afx_msg void OnBnClickedButtonTestResume();
-	afx_msg void OnBnClickedCheckMaintain();
+	afx_msg void OnBnClickedCheckRestorePreviousStartup();
 	afx_msg void OnClose();
-	afx_msg void OnBnClickedButtonAdvancedOption();
+	afx_msg void OnBnClickedButtonOpenAdvancedSettingDlg();
 protected:
-	int m_resume_wait_time;
+	int m_i_resume_wait_time;
 private:
-	CButton m_button_create_process;
+	CButton m_ctlButton_create_process;
 public:
-	CButton m_button_test_resume;
-	CButton m_button_test_suspend;
+	CButton m_ctlBtn_test_resume;
+	CButton m_ctlBtn_test_suspend;
+	afx_msg void OnBnClickedButtonSave();
+	afx_msg void OnMenuSave();
+	CButton m_ctlBtn_save;
+	CButton m_ctlBtn_cancel;
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	CButton m_ctlRdo_MainDlg_Show;
+	afx_msg void OnBnClickedRadioShowIcon();
+	afx_msg void OnBnClickedRadioMainDlgShowWindow();
+	afx_msg void OnBnClickedRadioShowTasktray();
+	afx_msg void OnClickedCheckRadikoSupportOn();
+	CButton m_ctlChk_restre_prev_startup_state;
+protected:
+	CSingleLock m_cSL_alock;
+	CSingleLock m_cSL_lock;
 };

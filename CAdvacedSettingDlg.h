@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "resource.h"
-#include "CEditCustom.h"
 
 // CAdvacedSetting ダイアログ
 
@@ -33,5 +32,8 @@ protected:
 public:
 	afx_msg void OnDestroy();
 protected:
-	CEditCustom m_ctl_Edit_custom;
+//	CEditCustom m_ctl_Edit_Resume_sleep_time;
+public:
+//	CEdit m_ctl_Edit_Resume_sleep_time;
+	CEdit m_ctlEdit_resume_sleep_time;
 };

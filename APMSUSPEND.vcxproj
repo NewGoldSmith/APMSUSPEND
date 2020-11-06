@@ -186,7 +186,6 @@
     <ClInclude Include="APMSUSPEND.h" />
     <ClInclude Include="APMSUSPENDDlg.h" />
     <ClInclude Include="CAdvacedSettingDlg.h" />
-    <ClInclude Include="CEditCustom.h" />
     <ClInclude Include="CStaticBmpControl.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
@@ -197,7 +196,6 @@
     <ClCompile Include="APMSUSPEND.cpp" />
     <ClCompile Include="APMSUSPENDDlg.cpp" />
     <ClCompile Include="CAdvacedSettingDlg.cpp" />
-    <ClCompile Include="CEditCustom.cpp" />
     <ClCompile Include="CStaticBmpControl.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

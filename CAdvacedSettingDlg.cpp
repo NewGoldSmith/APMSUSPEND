@@ -27,8 +27,8 @@ CAdvacedSettingDlg::~CAdvacedSettingDlg()
 void CAdvacedSettingDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	//  DDX_Control(pDX, IDC_EDIT_RESUME_SLEEP_TIME, m_ctl_Edit_custom);
 	DDX_Text(pDX, IDC_EDIT_RESUME_SLEEP_TIME, m_resume_wait_time);
+	DDX_Control(pDX, IDC_EDIT_RESUME_SLEEP_TIME, m_ctlEdit_resume_sleep_time);
 }
 
 
@@ -45,7 +45,7 @@ END_MESSAGE_MAP()
 void CAdvacedSettingDlg::OnClickedButtonSleepIncrease()
 {
 	CString str;
-	m_ctl_Edit_custom.GetWindowText(str);
+	m_ctlEdit_resume_sleep_time.GetWindowText(str);
 	int i = _ttoi(str);
 	i += 1000;
 	if (i > 9000)
@@ -53,14 +53,14 @@ void CAdvacedSettingDlg::OnClickedButtonSleepIncrease()
 		i = 9000;
 	}
 	str.Format(_T("%d"), i);
-	m_ctl_Edit_custom.SetWindowText(str);
+	m_ctlEdit_resume_sleep_time.SetWindowText(str);
 }
 
 
 void CAdvacedSettingDlg::OnClickedButtonSleepDecease()
 {
 	CString str;
-	m_ctl_Edit_custom.GetWindowText(str);
+	m_ctlEdit_resume_sleep_time.GetWindowText(str);
 	int i = _ttoi(str);
 	i -= 1000;
 	if (i < 0)
@@ -68,7 +68,7 @@ void CAdvacedSettingDlg::OnClickedButtonSleepDecease()
 		i = 0;
 	}
 	str.Format(_T("%d"),i);
-	m_ctl_Edit_custom.SetWindowText(str);
+	m_ctlEdit_resume_sleep_time.SetWindowText(str);
 }
 
 
@@ -80,14 +80,12 @@ BOOL CAdvacedSettingDlg::OnInitDialog()
 	UpdateData(FALSE);
 
 
-	m_ctl_Edit_custom.SubclassDlgItem(IDC_EDIT_RESUME_SLEEP_TIME, this);
 	CRect rect, rect2;
 	CSize size;
 	CFont* curFont;
-	
-	m_ctl_Edit_custom.GetClientRect(rect);
+	m_ctlEdit_resume_sleep_time.GetClientRect(rect);
 	size =rect.Size();
-	curFont = m_ctl_Edit_custom.GetFont();
+	curFont = m_ctlEdit_resume_sleep_time.GetFont();
 	LOGFONTW mylf;
 	curFont->GetLogFont(&mylf);
 	mylf.lfHeight = size.cy;
@@ -95,17 +93,8 @@ BOOL CAdvacedSettingDlg::OnInitDialog()
 	mylf.lfWeight = FW_HEAVY;
 	m_newFont = new CFont;
 	m_newFont->CreateFontIndirectW(&mylf);
-	m_ctl_Edit_custom.SetFont(m_newFont);
+	m_ctlEdit_resume_sleep_time.SetFont(m_newFont);
 
-/*	CString m_data = _T("1234567890");
-	CDC *pdc = m_ctl_Edit_custom.GetDC();
-	size = pdc->GetTextExtent(m_data);
-	rect2 = rect;
-	rect2.top = (rect.bottom - size.cy) / 2 ;
-	rect2.bottom = rect2.top + size.cy ;
-	rect2.bottom = rect2.bottom;
-	m_ctl_Edit_custom.SetRect(rect2);
- */
 	UpdateData(FALSE);
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 例外 : OCX プロパティ ページは必ず FALSE を返します。
