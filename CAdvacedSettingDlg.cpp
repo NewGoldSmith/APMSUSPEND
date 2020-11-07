@@ -113,14 +113,28 @@ void CAdvacedSettingDlg::OnDestroy()
 
 void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcut()
 {
-	LPCTSTR programPath = TEXT("%SystemRoot%\\system32\\calc.exe"); // 電卓のパス
+	CreateShortcut(CSIDL_DESKTOPDIRECTORY);
+}
+
+void CAdvacedSettingDlg::CreateShortcut(int csidl)
+{
+	//	CWinApp* pApp = AfxGetApp();
+	//	CString programPath,linkPath;
+	TCHAR	szModulePathName[MAX_PATH];
+	::GetModuleFileName(AfxGetInstanceHandle(), szModulePathName, MAX_PATH);	// DLLでも使えるようにAfxGetInstanceHandle()を使っている。
+	TCHAR	szLinkPathName[_MAX_PATH];
+	TCHAR	drive[_MAX_DRIVE];
+	TCHAR	dir[_MAX_DIR];
+	TCHAR	fname[_MAX_FNAME];
+	TCHAR	ext[_MAX_EXT];
+	_wsplitpath_s(szModulePathName, drive, _MAX_DRIVE, dir, _MAX_DIR, fname, _MAX_FNAME, ext, _MAX_EXT);
 	wchar_t linkPath[MAX_PATH]; // ショートカット名はユニコード限定
 
 	// デスクトップフォルダ取得（デスクトップかスタートメニューにしか作れない）
 	LPITEMIDLIST pidl;
 	SHGetSpecialFolderLocation(NULL, CSIDL_DESKTOPDIRECTORY, &pidl);
 	SHGetPathFromIDListW(pidl, linkPath);
-	wcscat_s(linkPath, L"\\calc.lnk");
+	wsprintf(linkPath, L"%s\\%s%s", linkPath, fname, L".lnk");
 
 	IShellLink* sl;
 	IPersistFile* pf;
@@ -129,7 +143,7 @@ void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcut()
 	{
 		if (sl->QueryInterface(IID_IPersistFile, (void**)&pf) == S_OK)
 		{
-			sl->SetPath(programPath); // プログラムパス
+			sl->SetPath(szModulePathName); // プログラムパス
 			sl->SetDescription(NULL); // 説明（＝ ツールチップス）
 			sl->SetArguments(NULL); // コマンドライン引数
 			sl->SetWorkingDirectory(NULL); // 作業ディレクトリ
@@ -138,10 +152,24 @@ void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcut()
 			pf->Save(linkPath, TRUE); // ショートカットを保存
 			pf->Release(); // IPersistFileへのポインタを破棄
 			pf = NULL;
+
+
 		}
 		sl->Release(); // IShellLinkへのポインタを破棄
 		sl = NULL;
 	}
 	CoUninitialize(); // COMライブラリをクローズ
+/*
+	wchar_t lpNewFileName[MAX_PATH];
+	SHGetSpecialFolderLocation(NULL, CSIDL_STARTUP, &pidl);
+	SHGetPathFromIDListW(pidl, lpNewFileName);
+	wsprintf(lpNewFileName, L"%s\\%s%s", lpNewFileName, fname, L".lnk");
+
+	MoveFile(
+		linkPath, // ファイル名
+		lpNewFileName // 新しいファイル名
+	);
+	*/
+
 	return;
 }
