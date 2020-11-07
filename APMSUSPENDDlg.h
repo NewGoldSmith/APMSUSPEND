@@ -6,6 +6,7 @@
 
 #include "CStaticBmpControl.h"
 #include "CAdvacedSettingDlg.h"
+#include <atlpath.h>
 
 #define WM_TASKTRAY     WM_USER + 1 
 
@@ -54,7 +55,7 @@ public:
 	virtual BOOL DestroyWindow();
 	BOOL m_b_safe_suspend_support_on;
 	int m_i_Radiko_is_startup;
-	BOOL m_b_restore_previous_target_startup_state;
+	BOOL m_b_restore_prev_target_startup_state;
 private:
 	void CreateTargetProcess();
 protected:
@@ -69,16 +70,15 @@ public:
 	int m_i_show_maindlg_state;
 	afx_msg void OnAppShow();
 	afx_msg void OnAppIcon();
-	afx_msg void OnAppClose();
-	afx_msg void OnRadikoSetPath();
-	afx_msg void OnRadikoStartUp();
-	afx_msg void OnRadikoClose();
+	afx_msg void OnTargetSetPath();
+	afx_msg void OnTargetStartUp();
+	afx_msg void OnTargetClose();
 	afx_msg void OnBnClickedOk();
 	BOOL m_b_use_task_tray;
 	afx_msg void OnClickedCheckUseTaskTray();
 	afx_msg void OnBnClickedButtonDoTasktray();
-	CButton m_ctlButton_check_use_tasktray;
-	CButton m_ctlButton_check_radiko_suport_on;
+	CButton m_ctlChk_use_tasktray;
+	CButton m_ctlChk_safe_suspend_suport_on;
 private:
 	CStatic m_ctlStatic_Target_path;
 public:
@@ -88,7 +88,7 @@ public:
 	CStaticBmpControl m_ctlImgCtl_Powerlamp;
 public:
 	virtual void Dump(CDumpContext& dc) const;
-	BOOL m_b_Radiko_had_startup;
+	BOOL m_b_Target_had_startup;
 	afx_msg void OnBnClickedButtonTestSuspend();
 	afx_msg void OnBnClickedButtonTestResume();
 	afx_msg void OnBnClickedCheckRestorePreviousStartup();
@@ -97,7 +97,7 @@ public:
 protected:
 	int m_i_resume_wait_time;
 private:
-	CButton m_ctlButton_create_process;
+	CButton m_ctlBtn_create_process;
 public:
 	CButton m_ctlBtn_test_resume;
 	CButton m_ctlBtn_test_suspend;
@@ -109,9 +109,9 @@ public:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	CButton m_ctlRdo_MainDlg_Show;
 	afx_msg void OnBnClickedRadioShowIcon();
-	afx_msg void OnBnClickedRadioMainDlgShowWindow();
+	afx_msg void OnBnClickedRadioShowWindow();
 	afx_msg void OnBnClickedRadioShowTasktray();
-	afx_msg void OnClickedCheckRadikoSupportOn();
+	afx_msg void OnClickedCheckTargetSupportOn();
 	CButton m_ctlChk_restre_prev_startup_state;
 protected:
 	CSingleLock m_cSL_alock;

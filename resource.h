@@ -19,12 +19,12 @@
 #define IDC_BUTTON_CREATE_PROCESS       1001
 #define IDC_BUTTON_CLOSE_PROCESS        1002
 #define IDC_STATIC_TARGET_PATH          1008
-#define IDC_CHECK_RESTORE_PREVIOUS_STARTUP              1009
-#define IDC_CHECK_RADIKO_SUPPORT_ON     1010
+#define IDC_CHECK_RESTORE_PREVIOUS_STARTUP 1009
+#define IDC_CHECK_TARGET_SUPPORT_ON     1010
 #define IDC_RADIO_MAIN_DLG_SHOW_STATUS  1013
-#define IDC_RADIO_MAIN_DLG_SHOW_WINDOW  1013
-#define IDC_RADIO_SHOW_ICON             1014
-#define IDC_RADIO_SHOW_TASKTRAY         1015
+#define IDC_RADIO_SHOW_WINDOW_MAIN_STARTUP 1013
+#define IDC_RADIO_SHOW_ICON_MAIN_STARTUP 1014
+#define IDC_RADIO_SHOW_TASKTRAY_MAIN_STARTUP 1015
 #define IDC_CHECK_USE_TASK_TRAY         1016
 #define IDC_BUTTON_DO_TASKTRAY          1017
 #define IDC_STATIC_PICTURE_CONTROL_POWER_INDIGATE 1018
@@ -37,10 +37,11 @@
 #define IDC_BUTTON_SLEEP_DECEASE        1026
 #define ID_SAVE                         1027
 #define IDC_BUTTON_SAVE                 1028
-#define ID_RADIKO_SET_PATH              32780
-#define ID_RADIKO_START_UP              32783
-#define ID_RADIKO_CLOSE                 32785
-#define ID_APP_SAVE_AND_CLOSE           32787
+#define IDC_BUTTON1                     1029
+#define IDC_BUTTON_CREATE_SHORTCUT      1029
+#define ID_SET_TARGET_PATH              32780
+#define ID_TARGET_START_UP              32783
+#define ID_TARGET_CLOSE                 32785
 #define ID_APP_SHOW                     32789
 #define ID_APP_ICON                     32790
 #define ID_CANCEL                       32794
@@ -53,7 +54,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        153
 #define _APS_NEXT_COMMAND_VALUE         32797
-#define _APS_NEXT_CONTROL_VALUE         1029
+#define _APS_NEXT_CONTROL_VALUE         1030
 #define _APS_NEXT_SYMED_VALUE           109
 #endif
 #endif

@@ -36,4 +36,5 @@ protected:
 public:
 //	CEdit m_ctl_Edit_Resume_sleep_time;
 	CEdit m_ctlEdit_resume_sleep_time;
+	afx_msg void OnBnClickedButtonCreateShortcut();
 };

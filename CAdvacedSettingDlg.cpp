@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CAdvacedSettingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SLEEP_INCREASE, &CAdvacedSettingDlg::OnClickedButtonSleepIncrease)
 	ON_BN_CLICKED(IDC_BUTTON_SLEEP_DECEASE, &CAdvacedSettingDlg::OnClickedButtonSleepDecease)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_CREATE_SHORTCUT, &CAdvacedSettingDlg::OnBnClickedButtonCreateShortcut)
 END_MESSAGE_MAP()
 
 
@@ -107,4 +108,40 @@ void CAdvacedSettingDlg::OnDestroy()
 
 	m_newFont->DeleteObject();
 	delete m_newFont;
+}
+
+
+void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcut()
+{
+	LPCTSTR programPath = TEXT("%SystemRoot%\\system32\\calc.exe"); // 電卓のパス
+	wchar_t linkPath[MAX_PATH]; // ショートカット名はユニコード限定
+
+	// デスクトップフォルダ取得（デスクトップかスタートメニューにしか作れない）
+	LPITEMIDLIST pidl;
+	SHGetSpecialFolderLocation(NULL, CSIDL_DESKTOPDIRECTORY, &pidl);
+	SHGetPathFromIDListW(pidl, linkPath);
+	wcscat_s(linkPath, L"\\calc.lnk");
+
+	IShellLink* sl;
+	IPersistFile* pf;
+	CoInitialize(NULL); // COMライブラリを初期化
+	if (CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void**)&sl) == S_OK)
+	{
+		if (sl->QueryInterface(IID_IPersistFile, (void**)&pf) == S_OK)
+		{
+			sl->SetPath(programPath); // プログラムパス
+			sl->SetDescription(NULL); // 説明（＝ ツールチップス）
+			sl->SetArguments(NULL); // コマンドライン引数
+			sl->SetWorkingDirectory(NULL); // 作業ディレクトリ
+			sl->SetIconLocation(NULL, 0); // Iconのパスまたはインデックス
+			sl->SetShowCmd(SW_SHOWNORMAL); // 起動時のウィンドウ表示
+			pf->Save(linkPath, TRUE); // ショートカットを保存
+			pf->Release(); // IPersistFileへのポインタを破棄
+			pf = NULL;
+		}
+		sl->Release(); // IShellLinkへのポインタを破棄
+		sl = NULL;
+	}
+	CoUninitialize(); // COMライブラリをクローズ
+	return;
 }
