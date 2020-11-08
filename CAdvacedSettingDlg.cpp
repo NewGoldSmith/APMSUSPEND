@@ -29,7 +29,10 @@ void CAdvacedSettingDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT_RESUME_SLEEP_TIME, m_resume_wait_time);
-	DDX_Control(pDX, IDC_EDIT_RESUME_SLEEP_TIME, m_ctlEdit_resume_sleep_time);
+	DDX_Control(pDX, IDC_EDIT_RESUME_SLEEP_TIME, m_ctlEdit_resume_wait_time);
+	DDX_Control(pDX, IDC_STATIC_EXIST_LINK_DESKTOP, m_ctlImgctl_Exist_Link_Desktop);
+	DDX_Control(pDX, IDC_STATIC_EXIST_LINK_MENU, m_ctlImgctl_Exist_Link_Menu);
+	DDX_Control(pDX, IDC_STATIC_EXIST_LINK_STARTUP, m_ctlImgctl_Exist_Link_Startup);
 }
 
 
@@ -52,7 +55,7 @@ END_MESSAGE_MAP()
 void CAdvacedSettingDlg::OnClickedButtonSleepIncrease()
 {
 	CString str;
-	m_ctlEdit_resume_sleep_time.GetWindowText(str);
+	m_ctlEdit_resume_wait_time.GetWindowText(str);
 	int i = _ttoi(str);
 	i += 1000;
 	if (i > 9000)
@@ -60,14 +63,14 @@ void CAdvacedSettingDlg::OnClickedButtonSleepIncrease()
 		i = 9000;
 	}
 	str.Format(_T("%d"), i);
-	m_ctlEdit_resume_sleep_time.SetWindowText(str);
+	m_ctlEdit_resume_wait_time.SetWindowText(str);
 }
 
 
 void CAdvacedSettingDlg::OnClickedButtonSleepDecease()
 {
 	CString str;
-	m_ctlEdit_resume_sleep_time.GetWindowText(str);
+	m_ctlEdit_resume_wait_time.GetWindowText(str);
 	int i = _ttoi(str);
 	i -= 1000;
 	if (i < 0)
@@ -75,7 +78,7 @@ void CAdvacedSettingDlg::OnClickedButtonSleepDecease()
 		i = 0;
 	}
 	str.Format(_T("%d"),i);
-	m_ctlEdit_resume_sleep_time.SetWindowText(str);
+	m_ctlEdit_resume_wait_time.SetWindowText(str);
 }
 
 
@@ -90,9 +93,9 @@ BOOL CAdvacedSettingDlg::OnInitDialog()
 	CRect rect;
 	CSize size;
 	CFont* curFont;
-	m_ctlEdit_resume_sleep_time.GetClientRect(rect);
+	m_ctlEdit_resume_wait_time.GetClientRect(rect);
 	size =rect.Size();
-	curFont = m_ctlEdit_resume_sleep_time.GetFont();
+	curFont = m_ctlEdit_resume_wait_time.GetFont();
 	LOGFONT mylf;
 	curFont->GetLogFont(&mylf);
 	mylf.lfHeight = size.cy;
@@ -100,7 +103,9 @@ BOOL CAdvacedSettingDlg::OnInitDialog()
 	mylf.lfWeight = FW_HEAVY;
 	m_newFont = new CFont;
 	m_newFont->CreateFontIndirect(&mylf);
-	m_ctlEdit_resume_sleep_time.SetFont(m_newFont);
+	m_ctlEdit_resume_wait_time.SetFont(m_newFont);
+
+	Update_Lamp();
 
 	UpdateData(FALSE);
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -208,41 +213,63 @@ void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartup()
 	// デスクトップにショートカット作成（デスクトップかスタートメニューにしか作れない）
 	CreateShortCut(CSIDL_DESKTOPDIRECTORY);
 	MoveLink(CSIDL_DESKTOPDIRECTORY, CSIDL_STARTUP);
+	Update_Lamp();
 }
 
 
 void CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartup()
 {
 	DeleteLink(CSIDL_STARTUP);
+	Update_Lamp();
 }
 
 
 void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutDesktop()
 {
 	CreateShortCut(CSIDL_DESKTOPDIRECTORY);
+	Update_Lamp();
 }
 
 
 void CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutDesktop()
 {
 	DeleteLink(CSIDL_DESKTOPDIRECTORY);
+	Update_Lamp();
 }
 
 void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartmenu()
 {
 	CreateShortCut(CSIDL_STARTMENU);
+	Update_Lamp();
 }
 
 
 void CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartmenu()
 {
 	DeleteLink(CSIDL_STARTMENU);
+	Update_Lamp();
 }
 
+void CAdvacedSettingDlg::Update_Lamp()
+{
+	if (FindLink(CSIDL_DESKTOPDIRECTORY)) {
+		m_ctlImgctl_Exist_Link_Desktop = 1;
+	}
+	else {
+		m_ctlImgctl_Exist_Link_Desktop = 0;
+	}
 
+	if (FindLink(CSIDL_STARTUP)) {
+		m_ctlImgctl_Exist_Link_Startup = 1;
+	}
+	else {
+		m_ctlImgctl_Exist_Link_Startup = 0;
+	}
 
-
-
-
-
-
+	if (FindLink(CSIDL_STARTMENU)) {
+		m_ctlImgctl_Exist_Link_Menu = 1;
+	}
+	else {
+		m_ctlImgctl_Exist_Link_Menu = 0;
+	}
+}

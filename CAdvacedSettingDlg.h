@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "resource.h"
+#include "CStaticBmpControl.h"
 
 // CAdvacedSetting ダイアログ
 
@@ -22,7 +23,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-//	CEdit m_ctl_Edit_custom;
 	afx_msg void OnClickedButtonSleepIncrease();
 	afx_msg void OnClickedButtonSleepDecease();
 	int m_resume_wait_time;
@@ -31,28 +31,23 @@ protected:
 	CFont* m_newFont;
 public:
 	afx_msg void OnDestroy();
-protected:
-//	CEditCustom m_ctl_Edit_Resume_sleep_time;
-public:
-//	CEdit m_ctl_Edit_Resume_sleep_time;
-	CEdit m_ctlEdit_resume_sleep_time;
-//	afx_msg void OnBnClickedButtonCreateShortcut();
-//	virtual HRESULT accDoDefaultAction(VARIANT varChild);
-private:
-//	void CreateDesktopShortcut();
-public:
+	CEdit m_ctlEdit_resume_wait_time;
 	afx_msg void OnBnClickedButtonCreateShortcutStartup();
 	afx_msg void OnBnClickedButtonDeleteShortcutStartup();
 	afx_msg void OnBnClickedButtonCreateShortcutDesktop();
 	afx_msg void OnBnClickedButtonDeleteShortcutDesktop();
 	afx_msg void OnBnClickedButtonCreateShortcutStartmenu();
 	afx_msg void OnBnClickedButtonDeleteShortcutStartmenu();
+protected:
 	void DeleteLink(int csidl);
-private:
 	void MoveLink(int csidlDest, int csidlSource);
-public:
 	bool FindLink(int csidlPath);
 	void GetLinkPathName(int csidlPath, LPTSTR pszPathName);
-private:
+
 	void CreateShortCut(int csidl);
+	CStaticBmpControl m_ctlImgctl_Exist_Link_Desktop;
+	CStaticBmpControl m_ctlImgctl_Exist_Link_Menu;
+	CStaticBmpControl m_ctlImgctl_Exist_Link_Startup;
+private:
+	void Update_Lamp();
 };

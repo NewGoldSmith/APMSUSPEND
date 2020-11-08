@@ -56,8 +56,9 @@ void CStaticBmpControl::OnPaint()
 					   // 描画メッセージで CStatic::OnPaint() を呼び出さないでください。
  
 	// PictureCotrolの領域を取得します。
-	 CRect rect;
-	 GetClientRect(&rect);
+	 CRect clRect;
+	 GetClientRect(&clRect);
+	 BITMAP stBmp;
 
 	 // Bitmapファイルをロードします。
 	 CBitmap bmp_on,bmp_off,bmp_mask;
@@ -72,15 +73,21 @@ void CStaticBmpControl::OnPaint()
 	 mdc_off.SelectObject(bmp_off);
 	 mdc_mask.CreateCompatibleDC(&dc);
 	 mdc_mask.SelectObject(bmp_mask);
-	 dc.BitBlt(0, 0, rect.Width(), rect.Height(), &mdc_mask, 0, 0, SRCAND);
+
+	 bmp_on.GetBitmap(&stBmp);
+
+	 dc.StretchBlt(0, 0, clRect.Width(), clRect.Height(), &mdc_mask, 0, 0, stBmp.bmWidth, stBmp.bmHeight,SRCAND);
+
 	 if (m_is_lamp == FALSE)
 	 {
-		 dc.BitBlt(0, 0, rect.Width(), rect.Height(), &mdc_off, 0, 0, SRCPAINT);
+		 dc.StretchBlt(0, 0, clRect.Width(), clRect.Height(), &mdc_off, 0, 0, stBmp.bmWidth, stBmp.bmHeight, SRCPAINT);
 	 }
 	 else
 	 {
-		 dc.BitBlt(0, 0, rect.Width(), rect.Height(), &mdc_on, 0, 0, SRCPAINT);
+		 dc.StretchBlt(0, 0, clRect.Width(), clRect.Height(), &mdc_on, 0, 0, stBmp.bmWidth, stBmp.bmHeight, SRCPAINT);
 	 }
+
+
  }
 
 BOOL CStaticBmpControl::LampOn(BOOL b=1)
