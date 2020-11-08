@@ -6,12 +6,12 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_APMSUSPEND_DIALOG           102
+#define IDS_EXISTING_NO_LINK            103
 #define ID_BUTTON_SAVE                  108
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP_POWER_OFF_LAMP       132
 #define IDR_MENU_MAIN                   136
 #define IDB_BITMAP_MASK                 143
-#define IDI_ICON1                       143
 #define IDB_BITMAP_POWER_ON_LAMP        150
 #define IDD_ADVANCED_SETTING            151
 #define IDC_BUTTON_OPEN_PATH            1000
@@ -37,14 +37,14 @@
 #define ID_SAVE                         1027
 #define IDC_BUTTON_SLEEP_DECEASE        1027
 #define IDC_BUTTON_SAVE                 1028
-#define IDC_BUTTON_DELITE_SHORTCUT_STARTUP 1028
+#define IDC_BUTTON_DELETE_SHORTCUT_STARTUP 1028
 #define IDC_BUTTON_DELETE_SHORTCUT_STARTMENU 1030
 #define IDC_BUTTON_DELETE_SHORTCUT_DESKTOP 1031
 #define IDC_BUTTON_CREATE_SHORTCUT_STARTMENU 1032
 #define IDC_BUTTON_CREATE_SHORTCUT_DESKTOP 1033
-#define IDC_STATIC_EXIST_LINK_STARTUP   1045
-#define IDC_STATIC_EXIST_LINK_DESKTOP   1046
-#define IDC_STATIC_EXIST_LINK_MENU      1047
+#define IDC_IMGCTL_EXIST_LINK_STARTUP   1045
+#define IDC_IMGCTL_EXIST_LINK_DESKTOP   1046
+#define IDC_IMGCTL_EXIST_LINK_MENU      1047
 #define IDC_CUSTOM1                     1048
 #define ID_SET_TARGET_PATH              32780
 #define ID_TARGET_START_UP              32783
@@ -61,7 +61,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        156
 #define _APS_NEXT_COMMAND_VALUE         32797
-#define _APS_NEXT_CONTROL_VALUE         1049
+#define _APS_NEXT_CONTROL_VALUE         1052
 #define _APS_NEXT_SYMED_VALUE           109
 #endif
 #endif

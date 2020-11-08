@@ -50,4 +50,13 @@ protected:
 	CStaticBmpControl m_ctlImgctl_Exist_Link_Startup;
 private:
 	void Update_Lamp();
+protected:
+	CButton m_ctlBtn_create_shortcut_desktop;
+public:
+	CButton m_ctlBtn_create_shortcut_menu;
+	CButton m_ctlBtn_create_shortcut_startup;
+	CButton m_ctlBtn_delete_shortcut_desktop;
+	CButton m_ctlBtn_delete_shortcut_menu;
+	CButton m_ctlBtn_delete_shortcut_startup;
+
 };

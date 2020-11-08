@@ -30,9 +30,15 @@ void CAdvacedSettingDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT_RESUME_SLEEP_TIME, m_resume_wait_time);
 	DDX_Control(pDX, IDC_EDIT_RESUME_SLEEP_TIME, m_ctlEdit_resume_wait_time);
-	DDX_Control(pDX, IDC_STATIC_EXIST_LINK_DESKTOP, m_ctlImgctl_Exist_Link_Desktop);
-	DDX_Control(pDX, IDC_STATIC_EXIST_LINK_MENU, m_ctlImgctl_Exist_Link_Menu);
-	DDX_Control(pDX, IDC_STATIC_EXIST_LINK_STARTUP, m_ctlImgctl_Exist_Link_Startup);
+	DDX_Control(pDX, IDC_IMGCTL_EXIST_LINK_DESKTOP, m_ctlImgctl_Exist_Link_Desktop);
+	DDX_Control(pDX, IDC_IMGCTL_EXIST_LINK_MENU, m_ctlImgctl_Exist_Link_Menu);
+	DDX_Control(pDX, IDC_IMGCTL_EXIST_LINK_STARTUP, m_ctlImgctl_Exist_Link_Startup);
+	DDX_Control(pDX, IDC_BUTTON_CREATE_SHORTCUT_DESKTOP, m_ctlBtn_create_shortcut_desktop);
+	DDX_Control(pDX, IDC_BUTTON_CREATE_SHORTCUT_STARTMENU, m_ctlBtn_create_shortcut_menu);
+	DDX_Control(pDX, IDC_BUTTON_CREATE_SHORTCUT_STARTUP, m_ctlBtn_create_shortcut_startup);
+	DDX_Control(pDX, IDC_BUTTON_DELETE_SHORTCUT_DESKTOP, m_ctlBtn_delete_shortcut_desktop);
+	DDX_Control(pDX, IDC_BUTTON_DELETE_SHORTCUT_STARTMENU, m_ctlBtn_delete_shortcut_menu);
+	DDX_Control(pDX, IDC_BUTTON_DELETE_SHORTCUT_STARTUP, m_ctlBtn_delete_shortcut_startup);
 }
 
 
@@ -41,7 +47,7 @@ BEGIN_MESSAGE_MAP(CAdvacedSettingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SLEEP_DECEASE, &CAdvacedSettingDlg::OnClickedButtonSleepDecease)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTON_CREATE_SHORTCUT_STARTUP, &CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartup)
-	ON_BN_CLICKED(IDC_BUTTON_DELITE_SHORTCUT_STARTUP, &CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartup)
+	ON_BN_CLICKED(IDC_BUTTON_DELETE_SHORTCUT_STARTUP, &CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartup)
 	ON_BN_CLICKED(IDC_BUTTON_CREATE_SHORTCUT_DESKTOP, &CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutDesktop)
 	ON_BN_CLICKED(IDC_BUTTON_DELETE_SHORTCUT_DESKTOP, &CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutDesktop)
 	ON_BN_CLICKED(IDC_BUTTON_CREATE_SHORTCUT_STARTMENU, &CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartmenu)
@@ -93,10 +99,10 @@ BOOL CAdvacedSettingDlg::OnInitDialog()
 	CRect rect;
 	CSize size;
 	CFont* curFont;
+	LOGFONT mylf;
 	m_ctlEdit_resume_wait_time.GetClientRect(rect);
 	size =rect.Size();
 	curFont = m_ctlEdit_resume_wait_time.GetFont();
-	LOGFONT mylf;
 	curFont->GetLogFont(&mylf);
 	mylf.lfHeight = size.cy;
 	mylf.lfWidth = size.cx/5;
@@ -211,8 +217,7 @@ bool CAdvacedSettingDlg::FindLink(int csidlPath)
 void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartup()
 {
 	// デスクトップにショートカット作成（デスクトップかスタートメニューにしか作れない）
-	CreateShortCut(CSIDL_DESKTOPDIRECTORY);
-	MoveLink(CSIDL_DESKTOPDIRECTORY, CSIDL_STARTUP);
+	CreateShortCut(CSIDL_STARTUP);
 	Update_Lamp();
 }
 
@@ -252,24 +257,37 @@ void CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartmenu()
 
 void CAdvacedSettingDlg::Update_Lamp()
 {
+
 	if (FindLink(CSIDL_DESKTOPDIRECTORY)) {
 		m_ctlImgctl_Exist_Link_Desktop = 1;
+		m_ctlBtn_create_shortcut_desktop.EnableWindow(FALSE);
+		m_ctlBtn_delete_shortcut_desktop.EnableWindow(TRUE);
 	}
 	else {
 		m_ctlImgctl_Exist_Link_Desktop = 0;
+		m_ctlBtn_create_shortcut_desktop.EnableWindow(TRUE);
+		m_ctlBtn_delete_shortcut_desktop.EnableWindow(FALSE);
 	}
 
 	if (FindLink(CSIDL_STARTUP)) {
 		m_ctlImgctl_Exist_Link_Startup = 1;
+		m_ctlBtn_create_shortcut_startup.EnableWindow(FALSE);
+		m_ctlBtn_delete_shortcut_startup.EnableWindow(TRUE);
 	}
 	else {
 		m_ctlImgctl_Exist_Link_Startup = 0;
+		m_ctlBtn_create_shortcut_startup.EnableWindow(TRUE);
+		m_ctlBtn_delete_shortcut_startup.EnableWindow(FALSE);
 	}
 
 	if (FindLink(CSIDL_STARTMENU)) {
 		m_ctlImgctl_Exist_Link_Menu = 1;
+		m_ctlBtn_create_shortcut_menu.EnableWindow(FALSE);
+		m_ctlBtn_delete_shortcut_menu.EnableWindow(TRUE);
 	}
 	else {
 		m_ctlImgctl_Exist_Link_Menu = 0;
+		m_ctlBtn_create_shortcut_menu.EnableWindow(TRUE);
+		m_ctlBtn_delete_shortcut_menu.EnableWindow(FALSE);
 	}
 }

@@ -228,7 +228,7 @@ BOOL CAPMSUSPENDDlg::OnInitDialog()
 	m_i_show_maindlg_state = pApp->GetProfileInt(_T("SYSTEM"), _T("SHOW_DLG_STATE"), 0);
 	m_b_use_task_tray = pApp->GetProfileInt(_T("SYSTEM"), _T("USE_TASK_TRAY"), TRUE);
 	m_ctlImgCtl_Powerlamp = pApp->GetProfileInt(_T("TARGET_APP"), _T("IS_STARTUP"), 0);
-	m_i_resume_wait_time = pApp->GetProfileInt(_T("SYSTEM"), _T("RESUME_WAIT_TIME"), 2000);
+	m_i_resume_wait_time = pApp->GetProfileInt(_T("SYSTEM"), _T("RESUME_WAIT_TIME"), 0);
 	if (m_str_Target_path.GetLength()==0)
 	{
 //		m_str_Target_path = _T("C:\\Program Files (x86)\\radiko_player_air\\radiko_player_air.exe");
