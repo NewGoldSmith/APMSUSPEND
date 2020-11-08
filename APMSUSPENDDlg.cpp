@@ -873,3 +873,4 @@ void CAPMSUSPENDDlg::OnClickedCheckTargetSupportOn()
 		m_ctlBtn_save.EnableWindow(FALSE);
 	}
 }
+

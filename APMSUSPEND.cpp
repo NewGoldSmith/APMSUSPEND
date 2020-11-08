@@ -24,8 +24,7 @@ END_MESSAGE_MAP()
 CAPMSUSPENDApp::CAPMSUSPENDApp()
 {
 	// TODO: この位置に構築用コードを追加してください。
-	// ここに InitInstance 中の重要な初期化処理をすべて記述してください。
-//	m_pProfileName = NULL;
+	m_hMutex = NULL;
 }
 CAPMSUSPENDApp::~CAPMSUSPENDApp()
 {

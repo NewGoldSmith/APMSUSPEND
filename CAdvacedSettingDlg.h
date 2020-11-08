@@ -36,8 +36,23 @@ protected:
 public:
 //	CEdit m_ctl_Edit_Resume_sleep_time;
 	CEdit m_ctlEdit_resume_sleep_time;
-	afx_msg void OnBnClickedButtonCreateShortcut();
+//	afx_msg void OnBnClickedButtonCreateShortcut();
 //	virtual HRESULT accDoDefaultAction(VARIANT varChild);
 private:
-	void CreateShortcut(int csidl);
+//	void CreateDesktopShortcut();
+public:
+	afx_msg void OnBnClickedButtonCreateShortcutStartup();
+	afx_msg void OnBnClickedButtonDeleteShortcutStartup();
+	afx_msg void OnBnClickedButtonCreateShortcutDesktop();
+	afx_msg void OnBnClickedButtonDeleteShortcutDesktop();
+	afx_msg void OnBnClickedButtonCreateShortcutStartmenu();
+	afx_msg void OnBnClickedButtonDeleteShortcutStartmenu();
+	void DeleteLink(int csidl);
+private:
+	void MoveLink(int csidlDest, int csidlSource);
+public:
+	bool FindLink(int csidlPath);
+	void GetLinkPathName(int csidlPath, LPTSTR pszPathName);
+private:
+	void CreateShortCut(int csidl);
 };

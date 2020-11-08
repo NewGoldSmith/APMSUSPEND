@@ -2,6 +2,7 @@
 //
 
 #include "pch.h"
+#include <stdio.h>
 #include "APMSUSPEND.h"
 #include "CAdvacedSettingDlg.h"
 #include "afxdialogex.h"
@@ -36,7 +37,12 @@ BEGIN_MESSAGE_MAP(CAdvacedSettingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SLEEP_INCREASE, &CAdvacedSettingDlg::OnClickedButtonSleepIncrease)
 	ON_BN_CLICKED(IDC_BUTTON_SLEEP_DECEASE, &CAdvacedSettingDlg::OnClickedButtonSleepDecease)
 	ON_WM_DESTROY()
-	ON_BN_CLICKED(IDC_BUTTON_CREATE_SHORTCUT, &CAdvacedSettingDlg::OnBnClickedButtonCreateShortcut)
+	ON_BN_CLICKED(IDC_BUTTON_CREATE_SHORTCUT_STARTUP, &CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartup)
+	ON_BN_CLICKED(IDC_BUTTON_DELITE_SHORTCUT_STARTUP, &CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartup)
+	ON_BN_CLICKED(IDC_BUTTON_CREATE_SHORTCUT_DESKTOP, &CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutDesktop)
+	ON_BN_CLICKED(IDC_BUTTON_DELETE_SHORTCUT_DESKTOP, &CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutDesktop)
+	ON_BN_CLICKED(IDC_BUTTON_CREATE_SHORTCUT_STARTMENU, &CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartmenu)
+	ON_BN_CLICKED(IDC_BUTTON_DELETE_SHORTCUT_STARTMENU, &CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartmenu)
 END_MESSAGE_MAP()
 
 
@@ -80,20 +86,20 @@ BOOL CAdvacedSettingDlg::OnInitDialog()
 	// TODO: ここに初期化を追加してください
 	UpdateData(FALSE);
 
-
-	CRect rect, rect2;
+	//エディットコントロールのフォントのセッティング。クライアント領域全体を使って表示する。
+	CRect rect;
 	CSize size;
 	CFont* curFont;
 	m_ctlEdit_resume_sleep_time.GetClientRect(rect);
 	size =rect.Size();
 	curFont = m_ctlEdit_resume_sleep_time.GetFont();
-	LOGFONTW mylf;
+	LOGFONT mylf;
 	curFont->GetLogFont(&mylf);
 	mylf.lfHeight = size.cy;
 	mylf.lfWidth = size.cx/5;
 	mylf.lfWeight = FW_HEAVY;
 	m_newFont = new CFont;
-	m_newFont->CreateFontIndirectW(&mylf);
+	m_newFont->CreateFontIndirect(&mylf);
 	m_ctlEdit_resume_sleep_time.SetFont(m_newFont);
 
 	UpdateData(FALSE);
@@ -111,31 +117,14 @@ void CAdvacedSettingDlg::OnDestroy()
 }
 
 
-void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcut()
+void CAdvacedSettingDlg::CreateShortCut(int csidl)
 {
-	CreateShortcut(CSIDL_DESKTOPDIRECTORY);
-}
-
-void CAdvacedSettingDlg::CreateShortcut(int csidl)
-{
-	//	CWinApp* pApp = AfxGetApp();
-	//	CString programPath,linkPath;
 	TCHAR	szModulePathName[MAX_PATH];
-	::GetModuleFileName(AfxGetInstanceHandle(), szModulePathName, MAX_PATH);	// DLLでも使えるようにAfxGetInstanceHandle()を使っている。
 	TCHAR	szLinkPathName[_MAX_PATH];
-	TCHAR	drive[_MAX_DRIVE];
-	TCHAR	dir[_MAX_DIR];
-	TCHAR	fname[_MAX_FNAME];
-	TCHAR	ext[_MAX_EXT];
-	_wsplitpath_s(szModulePathName, drive, _MAX_DRIVE, dir, _MAX_DIR, fname, _MAX_FNAME, ext, _MAX_EXT);
-	wchar_t linkPath[MAX_PATH]; // ショートカット名はユニコード限定
 
-	// デスクトップフォルダ取得（デスクトップかスタートメニューにしか作れない）
-	LPITEMIDLIST pidl;
-	SHGetSpecialFolderLocation(NULL, CSIDL_DESKTOPDIRECTORY, &pidl);
-	SHGetPathFromIDListW(pidl, linkPath);
-	wsprintf(linkPath, L"%s\\%s%s", linkPath, fname, L".lnk");
+	::GetModuleFileName(AfxGetInstanceHandle(), szModulePathName, MAX_PATH);	// DLLでも使えるようにAfxGetInstanceHandle()を使っている。
 
+	GetLinkPathName(csidl, szLinkPathName);
 	IShellLink* sl;
 	IPersistFile* pf;
 	CoInitialize(NULL); // COMライブラリを初期化
@@ -143,33 +132,117 @@ void CAdvacedSettingDlg::CreateShortcut(int csidl)
 	{
 		if (sl->QueryInterface(IID_IPersistFile, (void**)&pf) == S_OK)
 		{
+			_bstr_t bszLinkPathName(szLinkPathName);//文字列変換
+
 			sl->SetPath(szModulePathName); // プログラムパス
 			sl->SetDescription(NULL); // 説明（＝ ツールチップス）
 			sl->SetArguments(NULL); // コマンドライン引数
 			sl->SetWorkingDirectory(NULL); // 作業ディレクトリ
 			sl->SetIconLocation(NULL, 0); // Iconのパスまたはインデックス
 			sl->SetShowCmd(SW_SHOWNORMAL); // 起動時のウィンドウ表示
-			pf->Save(linkPath, TRUE); // ショートカットを保存
+			pf->Save(bszLinkPathName, TRUE); // ショートカットを保存
 			pf->Release(); // IPersistFileへのポインタを破棄
 			pf = NULL;
-
-
 		}
 		sl->Release(); // IShellLinkへのポインタを破棄
 		sl = NULL;
 	}
 	CoUninitialize(); // COMライブラリをクローズ
-/*
-	wchar_t lpNewFileName[MAX_PATH];
-	SHGetSpecialFolderLocation(NULL, CSIDL_STARTUP, &pidl);
-	SHGetPathFromIDListW(pidl, lpNewFileName);
-	wsprintf(lpNewFileName, L"%s\\%s%s", lpNewFileName, fname, L".lnk");
-
-	MoveFile(
-		linkPath, // ファイル名
-		lpNewFileName // 新しいファイル名
-	);
-	*/
-
-	return;
 }
+
+
+void CAdvacedSettingDlg::GetLinkPathName(int csidlPath, LPTSTR pszPathName)
+{
+	TCHAR	szModulePathName[MAX_PATH];
+	TCHAR	szLinkPath[MAX_PATH]; // ショートカット名はユニコード限定
+	TCHAR	drive[_MAX_DRIVE];
+	TCHAR	dir[_MAX_DIR];
+	TCHAR	fname[_MAX_FNAME];
+	TCHAR	ext[_MAX_EXT];
+
+	::GetModuleFileName(AfxGetInstanceHandle(), szModulePathName, MAX_PATH);	// DLLでも使えるようにAfxGetInstanceHandle()を使っている。
+	_tsplitpath_s(szModulePathName, drive, _MAX_DRIVE, dir, _MAX_DIR, fname, _MAX_FNAME, ext, _MAX_EXT);
+
+	LPITEMIDLIST pidl;
+	SHGetSpecialFolderLocation(NULL, csidlPath, &pidl);
+	SHGetPathFromIDList(pidl, szLinkPath);
+	_stprintf_s(pszPathName, MAX_PATH, _T("%s\\%s%s"), szLinkPath, fname, _T(".lnk"));
+}
+
+
+void CAdvacedSettingDlg::MoveLink(int csidlSource, int csidlDest)
+{
+	TCHAR	szSourceLinkPathName[_MAX_PATH];
+	TCHAR	szDestLinkPathName[_MAX_PATH];
+	//ソース側リンクパスネーム取得
+	GetLinkPathName(csidlSource, szSourceLinkPathName);
+	//送り先側リンクパスネーム取得
+	GetLinkPathName(csidlDest, szDestLinkPathName);
+	MoveFile(szSourceLinkPathName, szDestLinkPathName);
+}
+
+
+void CAdvacedSettingDlg::DeleteLink(int csidl)
+{
+	TCHAR	szLinkPathName[_MAX_PATH];
+	GetLinkPathName(csidl, szLinkPathName);
+	CFile file;
+	file.Remove(szLinkPathName);
+}
+
+
+bool CAdvacedSettingDlg::FindLink(int csidlPath)
+{
+	CFileFind find;
+	CString filePath;
+
+	GetLinkPathName(csidlPath, filePath.GetBufferSetLength(MAX_PATH));
+	bool b = find.FindFile(filePath);
+	filePath.ReleaseBuffer();
+	return b;
+}
+
+
+void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartup()
+{
+	// デスクトップにショートカット作成（デスクトップかスタートメニューにしか作れない）
+	CreateShortCut(CSIDL_DESKTOPDIRECTORY);
+	MoveLink(CSIDL_DESKTOPDIRECTORY, CSIDL_STARTUP);
+}
+
+
+void CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartup()
+{
+	DeleteLink(CSIDL_STARTUP);
+}
+
+
+void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutDesktop()
+{
+	CreateShortCut(CSIDL_DESKTOPDIRECTORY);
+}
+
+
+void CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutDesktop()
+{
+	DeleteLink(CSIDL_DESKTOPDIRECTORY);
+}
+
+void CAdvacedSettingDlg::OnBnClickedButtonCreateShortcutStartmenu()
+{
+	CreateShortCut(CSIDL_STARTMENU);
+}
+
+
+void CAdvacedSettingDlg::OnBnClickedButtonDeleteShortcutStartmenu()
+{
+	DeleteLink(CSIDL_STARTMENU);
+}
+
+
+
+
+
+
+
+
