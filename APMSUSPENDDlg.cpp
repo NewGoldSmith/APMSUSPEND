@@ -43,12 +43,12 @@ UINT  CAPMSUSPENDDlg::Call_Target_end_detect(LPVOID p)
 	TRACE(_T("\r\nSTART Call_Target_end_detect\r\n"));
 	CAPMSUSPENDDlg* pDlg = (CAPMSUSPENDDlg*)p;
 
-	pDlg->m_cSL_alock.Lock();//このスレッドが生存中はLockしておく
+	pDlg->m_cSL_alive_lock.Lock();//このスレッドが生存中はLockしておく
 
 	WaitForSingleObject(pDlg->m_PI.hProcess, INFINITE);
 
 	pDlg->m_cSL_lock.Lock();
-	pDlg->m_ctlImgCtl_Powerlamp = 0;
+	pDlg->m_ctlImgCtl_lamp = 0;
 
 	CloseHandle(pDlg->m_PI.hThread);
 	CloseHandle(pDlg->m_PI.hProcess);
@@ -59,7 +59,7 @@ UINT  CAPMSUSPENDDlg::Call_Target_end_detect(LPVOID p)
 
 	TRACE(_T("\r\nEND Call_Target_end_detect\r\n"));
 
-	pDlg->m_cSL_alock.Unlock();
+	pDlg->m_cSL_alive_lock.Unlock();
 	pDlg->m_ctlBtn_create_process.EnableWindow(TRUE);
 	return 321;
 }
@@ -105,23 +105,24 @@ END_MESSAGE_MAP()
 CAPMSUSPENDDlg::CAPMSUSPENDDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_APMSUSPEND_DIALOG, pParent), m_cSem()
 , m_b_safe_suspend_support_on(FALSE)
-, m_b_restore_prev_target_startup_state(FALSE)
-, m_i_show_maindlg_state(0)
+, m_b_restore_Prev_target_startup_state(FALSE)
+, m_i_show_mainDlg_state(0)
 , m_b_use_task_tray(FALSE)
-,m_cSem_Callback_Alive()
-,m_cSL_alock(&m_cSem_Callback_Alive)
+,m_cSem_callback_alive()
+,m_cSL_alive_lock(&m_cSem_callback_alive)
 ,m_cSL_lock(&m_cSem)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_PI.hProcess = NULL;
 	m_PI.hThread = NULL;
-	mp_cThread_Detect_End = NULL;
-	m_ctlImgCtl_Powerlamp = 0;
-	m_b_IsHide = FALSE;
+	mp_cThread_detect_end = NULL;
+	m_ctlImgCtl_lamp = 0;
+	m_b_is_hide = FALSE;
 
 	m_is_power_state = 0;
 	m_b_Target_had_startup = 0;
 	m_i_resume_wait_time = 0;
+	m_i_show_mainDlg_state = 0;
 }
 CAPMSUSPENDDlg::~CAPMSUSPENDDlg() {
 
@@ -130,21 +131,26 @@ CAPMSUSPENDDlg::~CAPMSUSPENDDlg() {
 void CAPMSUSPENDDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_STATIC_TARGET_PATH, m_str_Target_path);
+
+	DDX_Text(pDX, IDC_STATIC_TARGET_PATH, m_str_target_path);
 	DDX_Check(pDX, IDC_CHECK_TARGET_SUPPORT_ON, m_b_safe_suspend_support_on);
-	DDX_Check(pDX, IDC_CHECK_RESTORE_PREVIOUS_STARTUP, m_b_restore_prev_target_startup_state);
-	DDX_Radio(pDX, IDC_RADIO_MAIN_DLG_SHOW_STATUS, m_i_show_maindlg_state);
+	DDX_Check(pDX, IDC_CHECK_RESTORE_PREVIOUS_STARTUP, m_b_restore_Prev_target_startup_state);
 	DDX_Check(pDX, IDC_CHECK_USE_TASK_TRAY, m_b_use_task_tray);
 	DDX_Control(pDX, IDC_CHECK_USE_TASK_TRAY, m_ctlChk_use_tasktray);
 	DDX_Control(pDX, IDC_CHECK_TARGET_SUPPORT_ON, m_ctlChk_safe_suspend_suport_on);
-	DDX_Control(pDX, IDC_STATIC_TARGET_PATH, m_ctlStatic_Target_path);
+	DDX_Control(pDX, IDC_STATIC_TARGET_PATH, m_ctlStc_target_path);
 	DDX_Control(pDX, IDC_BUTTON_CREATE_PROCESS, m_ctlBtn_create_process);
 	DDX_Control(pDX, IDC_BUTTON_TEST_RESUME, m_ctlBtn_test_resume);
 	DDX_Control(pDX, IDC_BUTTON_TEST_SUSPEND, m_ctlBtn_test_suspend);
-	DDX_Control(pDX, IDC_BUTTON_SAVE, m_ctlBtn_save);
+	DDX_Control(pDX, IDC_BUTTON_SAVE, m_ctlBn_save);
 	DDX_Control(pDX, IDCANCEL, m_ctlBtn_cancel);
-	DDX_Control(pDX, IDC_RADIO_SHOW_WINDOW_MAIN_STARTUP, m_ctlRdo_MainDlg_Show);
-	DDX_Control(pDX, IDC_CHECK_RESTORE_PREVIOUS_STARTUP, m_ctlChk_restre_prev_startup_state);
+	DDX_Control(pDX, IDC_RADIO_SHOW_WINDOW_MAIN_STARTUP, m_ctlRdb_mainDlg_showis);
+	DDX_Control(pDX, IDC_CHECK_RESTORE_PREVIOUS_STARTUP, m_ctlChk_restre_Prev_startup_state);
+	DDX_Control(pDX, IDC_RADIO_SHOW_ICON_MAIN_STARTUP, m_ctlRdb_show_icon_maindlg);
+	DDX_Control(pDX, IDC_RADIO_SHOW_TASKTRAY_MAIN_STARTUP, m_ctlRdb_show_tasktray_mainDlg);
+	DDX_Control(pDX, IDC_BUTTON_GO_TASKTRAY, m_ctlBn_do_tasktray);
+	UpdateRdbData(pDX->m_bSaveAndValidate);
+
 }
 
 BEGIN_MESSAGE_MAP(CAPMSUSPENDDlg, CDialogEx)
@@ -152,34 +158,35 @@ BEGIN_MESSAGE_MAP(CAPMSUSPENDDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_POWERBROADCAST()
-	ON_BN_CLICKED(IDC_BUTTON_OPEN_PATH, &CAPMSUSPENDDlg::OnBnClickedButtonGetPath)
-	ON_BN_CLICKED(IDC_BUTTON_CREATE_PROCESS, &CAPMSUSPENDDlg::OnBnClickedButtonCreateProcess)
-	ON_BN_CLICKED(IDC_BUTTON_CLOSE_PROCESS, &CAPMSUSPENDDlg::OnBnClickedButtonCloseProcess)
+	ON_BN_CLICKED(IDC_BUTTON_OPEN_PATH, &CAPMSUSPENDDlg::OnBnClickedGetPath)
+	ON_BN_CLICKED(IDC_BUTTON_CREATE_PROCESS, &CAPMSUSPENDDlg::OnBnClickedCreateProcess)
+	ON_BN_CLICKED(IDC_BUTTON_CLOSE_PROCESS, &CAPMSUSPENDDlg::OnBnClickedCloseProcess)
 	ON_WM_WINDOWPOSCHANGING()
 	ON_MESSAGE(WM_TASKTRAY, &CAPMSUSPENDDlg::OnTasktray)
 	ON_WM_DESTROY()
-	ON_COMMAND(ID_APP_SHOW, &CAPMSUSPENDDlg::OnAppShow)
-	ON_COMMAND(ID_APP_ICON, &CAPMSUSPENDDlg::OnAppIcon)
-	ON_COMMAND(ID_SET_TARGET_PATH, &CAPMSUSPENDDlg::OnTargetSetPath)
-	ON_COMMAND(ID_TARGET_START_UP, &CAPMSUSPENDDlg::OnTargetStartUp)
-	ON_COMMAND(ID_TARGET_CLOSE, &CAPMSUSPENDDlg::OnTargetClose)
+	ON_COMMAND(IDM_APP_SHOW, &CAPMSUSPENDDlg::OnAppShow)
+	ON_COMMAND(IDM_APP_ICON, &CAPMSUSPENDDlg::OnAppIcon)
+	ON_COMMAND(IDM_SET_TARGET_PATH, &CAPMSUSPENDDlg::OnTargetSetPath)
+	ON_COMMAND(IDM_TARGET_START_UP, &CAPMSUSPENDDlg::OnTargetStartUp)
+	ON_COMMAND(IDM_TARGET_CLOSE, &CAPMSUSPENDDlg::OnTargetClose)
 	ON_BN_CLICKED(IDOK, &CAPMSUSPENDDlg::OnBnClickedOk)
-	ON_BN_CLICKED(IDC_CHECK_USE_TASK_TRAY, &CAPMSUSPENDDlg::OnClickedCheckUseTaskTray)
-	ON_BN_CLICKED(IDC_BUTTON_DO_TASKTRAY, &CAPMSUSPENDDlg::OnBnClickedButtonDoTasktray)
+	ON_BN_CLICKED(IDC_CHECK_USE_TASK_TRAY, &CAPMSUSPENDDlg::OnBnClickedCheckUseTaskTray)
+	ON_BN_CLICKED(IDC_BUTTON_GO_TASKTRAY, &CAPMSUSPENDDlg::OnBnClickedGoTasktray)
 	ON_BN_CLICKED(IDCANCEL, &CAPMSUSPENDDlg::OnBnClickedCancel)
-	ON_COMMAND(ID_APP_CANCEL, &CAPMSUSPENDDlg::OnAppCancel)
+	ON_COMMAND(IDM_APP_CANCEL, &CAPMSUSPENDDlg::OnAppCancel)
 	ON_WM_DRAWITEM()
-	ON_BN_CLICKED(IDC_BUTTON_TEST_SUSPEND, &CAPMSUSPENDDlg::OnBnClickedButtonTestSuspend)
-	ON_BN_CLICKED(IDC_BUTTON_TEST_RESUME, &CAPMSUSPENDDlg::OnBnClickedButtonTestResume)
+	ON_BN_CLICKED(IDC_BUTTON_TEST_SUSPEND, &CAPMSUSPENDDlg::OnBnClickedTestSuspend)
+	ON_BN_CLICKED(IDC_BUTTON_TEST_RESUME, &CAPMSUSPENDDlg::OnBnClickedTestResume)
 	ON_BN_CLICKED(IDC_CHECK_RESTORE_PREVIOUS_STARTUP, &CAPMSUSPENDDlg::OnBnClickedCheckRestorePreviousStartup)
 	ON_WM_CLOSE()
-	ON_BN_CLICKED(IDC_BUTTON_ADVANCED_OPTION, &CAPMSUSPENDDlg::OnBnClickedButtonOpenAdvancedSettingDlg)
-	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CAPMSUSPENDDlg::OnBnClickedButtonSave)
-	ON_COMMAND(ID_MENU_SAVE, &CAPMSUSPENDDlg::OnMenuSave)
+	ON_BN_CLICKED(IDC_BUTTON_ADVANCED_OPTION, &CAPMSUSPENDDlg::OnBnClickedOpenAdvancedSettingDlg)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CAPMSUSPENDDlg::OnBnClickedSave)
+	ON_COMMAND(IDM_MENU_SAVE, &CAPMSUSPENDDlg::OnMenuSave)
 	ON_BN_CLICKED(IDC_RADIO_SHOW_ICON_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowIcon)
 	ON_BN_CLICKED(IDC_RADIO_SHOW_WINDOW_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowWindow)
 	ON_BN_CLICKED(IDC_RADIO_SHOW_TASKTRAY_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowTasktray)
 	ON_BN_CLICKED(IDC_CHECK_TARGET_SUPPORT_ON, &CAPMSUSPENDDlg::OnClickedCheckTargetSupportOn)
+	ON_COMMAND(IDM_GO_TASKTRAY, &CAPMSUSPENDDlg::OnGoTasktray)
 END_MESSAGE_MAP()
 
 
@@ -222,14 +229,14 @@ BOOL CAPMSUSPENDDlg::OnInitDialog()
  
 
 	CWinApp* pApp = AfxGetApp();
-	m_str_Target_path = pApp->GetProfileString(_T("SYSTEM"), _T("FILE_PATH"), _T("C:\\Program Files (x86)\\radiko_player_air\\radiko_player_air.exe"));
-	m_b_restore_prev_target_startup_state = pApp->GetProfileInt(_T("SYSTEM"), _T("SAVE_STARTUP_STATUS"), TRUE);
+	m_str_target_path = pApp->GetProfileString(_T("SYSTEM"), _T("FILE_PATH"), _T("C:\\Program Files (x86)\\radiko_player_air\\radiko_player_air.exe"));
+	m_b_restore_Prev_target_startup_state = pApp->GetProfileInt(_T("SYSTEM"), _T("SAVE_STARTUP_STATUS"), TRUE);
 	m_b_safe_suspend_support_on = pApp->GetProfileInt(_T("SYSTEM"), _T("SAFE_SUSPEND_SUPPORT_ON"), TRUE);
-	m_i_show_maindlg_state = pApp->GetProfileInt(_T("SYSTEM"), _T("SHOW_DLG_STATE"), 0);
+	m_i_show_mainDlg_state = pApp->GetProfileInt(_T("SYSTEM"), _T("SHOW_DLG_STATE"), 0);
 	m_b_use_task_tray = pApp->GetProfileInt(_T("SYSTEM"), _T("USE_TASK_TRAY"), TRUE);
-	m_ctlImgCtl_Powerlamp = pApp->GetProfileInt(_T("TARGET_APP"), _T("IS_STARTUP"), 0);
+	m_ctlImgCtl_lamp = pApp->GetProfileInt(_T("TARGET_APP"), _T("IS_STARTUP"), 0);
 	m_i_resume_wait_time = pApp->GetProfileInt(_T("SYSTEM"), _T("RESUME_WAIT_TIME"), 0);
-	if (m_str_Target_path.GetLength()==0)
+	if (m_str_target_path.GetLength()==0)
 	{
 //		m_str_Target_path = _T("C:\\Program Files (x86)\\radiko_player_air\\radiko_player_air.exe");
 	}
@@ -237,19 +244,17 @@ BOOL CAPMSUSPENDDlg::OnInitDialog()
 	UpdateData(FALSE);//iniファイルの内容をコントロール群に反映
 
 	//ダイアログアイテムのサブクラス化
-	m_ctlImgCtl_Powerlamp.SubclassDlgItem(IDC_STATIC_PICTURE_CONTROL_POWER_INDIGATE, this);
+	m_ctlImgCtl_lamp.SubclassDlgItem(IDC_STATIC_PICTURE_CONTROL_POWER_INDIGATE, this);
 
-	if (m_ctlImgCtl_Powerlamp.IsLampOn() && m_b_safe_suspend_support_on)
+	if (m_ctlImgCtl_lamp.IsLampOn() && m_b_safe_suspend_support_on)
 	{
 		CreateTargetProcess();
 	}
 
-
-
-	switch (IDC_RADIO_MAIN_DLG_SHOW_STATUS+m_i_show_maindlg_state)
+	switch (m_i_show_mainDlg_state)
 	{
-	case IDC_RADIO_MAIN_DLG_SHOW_STATUS:
-		m_b_IsHide = FALSE;
+	case 0:
+		m_b_is_hide = FALSE;
 		OnAppShow();
 		if (m_b_use_task_tray != 0)
 		{
@@ -257,7 +262,8 @@ BOOL CAPMSUSPENDDlg::OnInitDialog()
 		}	
 		break;
 
-	case IDC_RADIO_SHOW_ICON_MAIN_STARTUP:
+	case 1:
+		m_b_is_hide = FALSE;
 		OnAppIcon();
 		if (m_b_use_task_tray != 0)
 		{
@@ -265,14 +271,13 @@ BOOL CAPMSUSPENDDlg::OnInitDialog()
 		}
 		break;
 
-	case  IDC_RADIO_SHOW_TASKTRAY_MAIN_STARTUP:
-		m_b_IsHide = TRUE;
-		m_ctlChk_use_tasktray.SetCheck(TRUE);
+	case  2:
+		m_b_is_hide = TRUE;
 		TrayNotifyIcon(NIM_ADD);
 		break;
 	}
 
-	m_ctlBtn_save.EnableWindow(FALSE);
+	m_ctlBn_save.EnableWindow(FALSE);
 
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。
 }
@@ -342,7 +347,7 @@ UINT CAPMSUSPENDDlg::OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData)
 		TRACE(_T("\r\nSTART OnPowerBroadcast PBT_APMSUSPEND\r\n"));
 		if (m_ctlChk_safe_suspend_suport_on.GetCheck())
 		{
-			m_b_Target_had_startup = m_ctlImgCtl_Powerlamp.IsLampOn();
+			m_b_Target_had_startup = m_ctlImgCtl_lamp.IsLampOn();
 			EnumWindows((WNDENUMPROC)EnumWindowsProc, (LPARAM)&m_PI);
 		}
 		break;
@@ -358,10 +363,6 @@ UINT CAPMSUSPENDDlg::OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData)
 			Sleep(m_i_resume_wait_time);
 			CreateTargetProcess();
 		}
-		else
-		{
-//			m_ctlImgCtl_Powerlamp = 0;
-		}
 		break;
 
 	}
@@ -370,7 +371,7 @@ UINT CAPMSUSPENDDlg::OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData)
 	return CDialogEx::OnPowerBroadcast(nPowerEvent, nEventData);
 }
 
-void CAPMSUSPENDDlg::OnBnClickedButtonGetPath()
+void CAPMSUSPENDDlg::OnBnClickedGetPath()
 {
 //ファイルパスはスタティックコントロールに書かれる。変数には反映されない。
 	CFileDialog* pDlg = new CFileDialog(TRUE, _T("*.exe"), _T(""), OFN_HIDEREADONLY | OFN_FILEMUSTEXIST, _T("実行ファイル（*.exe)|*.exe|全て(*.*)|*.*||"), this);
@@ -383,24 +384,17 @@ void CAPMSUSPENDDlg::OnBnClickedButtonGetPath()
 	}
 	delete pDlg;
 	
-	if (m_str_Target_path != str)
-	{
-		m_ctlBtn_save.EnableWindow(TRUE);
-	}
-	else
-	{
-		m_ctlBtn_save.EnableWindow(FALSE);
-	}
-	m_ctlStatic_Target_path.SetWindowText(str);
+	m_ctlStc_target_path.SetWindowText(str);
+	DoChangeSaveBtn();
 }
 
 
-void CAPMSUSPENDDlg::OnBnClickedButtonCreateProcess()
+void CAPMSUSPENDDlg::OnBnClickedCreateProcess()
 {
 	CSingleLock lock(&m_cSem);
 	lock.Lock();
 
-	if(m_ctlImgCtl_Powerlamp.IsLampOn())
+	if(m_ctlImgCtl_lamp.IsLampOn())
 	{
 		lock.Unlock();
 		return;
@@ -417,12 +411,12 @@ void CAPMSUSPENDDlg::CreateTargetProcess()
 	s.wShowWindow = SW_SHOWNORMAL;
 
 	CString command;
-	m_ctlStatic_Target_path.GetWindowText(command);
+	m_ctlStc_target_path.GetWindowText(command);
 	CPathT<CString> path(command.GetBuffer());
 	if (path.FileExists() == FALSE)
 	{
 		AfxMessageBox(_T("ターゲットのパスが正しくありません。設定し直してください。"), MB_OK);
-		m_ctlImgCtl_Powerlamp = 0;
+		m_ctlImgCtl_lamp = 0;
 		return;
 	}
 	command.ReleaseBuffer();
@@ -445,12 +439,12 @@ void CAPMSUSPENDDlg::CreateTargetProcess()
 	{
 
 		//ターゲットの終了を検知する為のスレッドを作成。
-		mp_cThread_Detect_End = AfxBeginThread(CAPMSUSPENDDlg::Call_Target_end_detect, (LPVOID)this);
+		mp_cThread_detect_end = AfxBeginThread(CAPMSUSPENDDlg::Call_Target_end_detect, (LPVOID)this);
 		CSingleLock lock(&m_cSem);
 		lock.Lock();
-		mp_cThread_Detect_End->m_bAutoDelete = TRUE;
+		mp_cThread_detect_end->m_bAutoDelete = TRUE;
 		
-		m_ctlImgCtl_Powerlamp = 1;
+		m_ctlImgCtl_lamp = 1;
 		lock.Unlock();
 		m_ctlBtn_create_process.EnableWindow(FALSE);
 	}
@@ -462,12 +456,12 @@ void CAPMSUSPENDDlg::CreateTargetProcess()
 }
 
 
-void CAPMSUSPENDDlg::OnBnClickedButtonCloseProcess()
+void CAPMSUSPENDDlg::OnBnClickedCloseProcess()
 {
 
 	// プロセスを探し出しWM_CLOSEメッセージをポストするコールバック関数の呼び出し。
 	EnumWindows((WNDENUMPROC)EnumWindowsProc, (LPARAM)&m_PI);
-	m_ctlImgCtl_Powerlamp = 0;
+	m_ctlImgCtl_lamp = 0;
 }
 
 
@@ -475,24 +469,24 @@ void CAPMSUSPENDDlg::OnBnClickedButtonCloseProcess()
 BOOL CAPMSUSPENDDlg::DestroyWindow()
 {
 //ターゲット起動状態を保存するかどうか、ランプで保存する。
-	if (!m_b_restore_prev_target_startup_state)
+	if (!m_b_restore_Prev_target_startup_state)
 	{
-		m_ctlImgCtl_Powerlamp = 0;
+		m_ctlImgCtl_lamp = 0;
 	}
 
 	CWinApp* pApp = AfxGetApp();
-	pApp->WriteProfileString(_T("SYSTEM"), _T("FILE_PATH"), m_str_Target_path);
-	pApp->WriteProfileInt(_T("SYSTEM"), _T("SAVE_STARTUP_STATUS"), m_b_restore_prev_target_startup_state);
+	pApp->WriteProfileString(_T("SYSTEM"), _T("FILE_PATH"), m_str_target_path);
+	pApp->WriteProfileInt(_T("SYSTEM"), _T("SAVE_STARTUP_STATUS"), m_b_restore_Prev_target_startup_state);
 	pApp->WriteProfileInt(_T("SYSTEM"), _T("SAFE_SUSPEND_SUPPORT_ON"), m_b_safe_suspend_support_on);
-	pApp->WriteProfileInt(_T("TARGET_APP"), _T("IS_STARTUP"), m_ctlImgCtl_Powerlamp.IsLampOn());
-	pApp->WriteProfileInt(_T("SYSTEM"), _T("SHOW_DLG_STATE"), m_i_show_maindlg_state );
+	pApp->WriteProfileInt(_T("TARGET_APP"), _T("IS_STARTUP"), m_ctlImgCtl_lamp.IsLampOn());
+	pApp->WriteProfileInt(_T("SYSTEM"), _T("SHOW_DLG_STATE"), m_i_show_mainDlg_state );
 	pApp->WriteProfileInt(_T("SYSTEM"), _T("USE_TASK_TRAY"), m_b_use_task_tray);
 	pApp->WriteProfileInt(_T("SYSTEM"), _T("RESUME_WAIT_TIME"), m_i_resume_wait_time);
 
 //ターゲットプロセスを探し出し、閉じるメッセージを送る
 	EnumWindows((WNDENUMPROC)EnumWindowsProc, (LPARAM)&m_PI);
 
-	CSingleLock alock(&m_cSem_Callback_Alive);
+	CSingleLock alock(&m_cSem_callback_alive);
 
 //スレッドが終了するまで待つ。通常こちらのスレッドの方が圧倒的に早いので
 //	あらかじめコールバック関数でm_cSem_Callback_AliveをLockしておく。
@@ -509,13 +503,13 @@ void CAPMSUSPENDDlg::OnWindowPosChanging(WINDOWPOS* lpwndpos)
 {
 	CDialogEx::OnWindowPosChanging(lpwndpos);
 
-	if (m_b_IsHide)
+	if (m_b_is_hide)
 		lpwndpos->flags &= ~SWP_SHOWWINDOW;
 }
 
 
 
-
+//ユーザー定義のウインドウメッセージWM_TASKTRAYで呼び出される
 afx_msg LRESULT CAPMSUSPENDDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 {
 //タスクトレイの振る舞いを記述。
@@ -523,7 +517,7 @@ afx_msg LRESULT CAPMSUSPENDDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 	{
 	case WM_LBUTTONDOWN:
 		if (wParam == IDR_MAINFRAME) {    // アイコンID
-			if (m_b_IsHide)
+			if (m_b_is_hide)
 			{
 				OnAppShow();
 			}
@@ -533,11 +527,9 @@ afx_msg LRESULT CAPMSUSPENDDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				m_b_IsHide = TRUE;
+				m_b_is_hide = TRUE;
 				m_ctlChk_use_tasktray.SetCheck(TRUE);
 				ShowWindow(SW_HIDE);
-
-
 			}
 		}
 		break;
@@ -545,7 +537,7 @@ afx_msg LRESULT CAPMSUSPENDDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 		if (wParam == IDR_MAINFRAME) {
 			CMenu menu;
 			menu.LoadMenu(IDR_MENU_MAIN);
-			CMenu* popup = menu.GetSubMenu(0);
+			CMenu* pPopup = menu.GetSubMenu(0);
 			UINT is_enable = MF_BYCOMMAND | MF_ENABLED;
 			UINT is_disable= MF_BYCOMMAND | MF_DISABLED | MF_GRAYED;
 			
@@ -555,54 +547,70 @@ afx_msg LRESULT CAPMSUSPENDDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 			{
 				if (IsIconic())
 				{
-					popup->EnableMenuItem(ID_APP_SHOW, is_enable);
+					pPopup->EnableMenuItem(IDM_APP_SHOW, is_enable);
 				}
 				else
 				{
-					popup->EnableMenuItem(ID_APP_SHOW, is_disable);
+					pPopup->EnableMenuItem(IDM_APP_SHOW, is_disable);
 				}
 			}
 			else
 			{
-				popup->EnableMenuItem(ID_APP_SHOW, is_enable);
+				pPopup->EnableMenuItem(IDM_APP_SHOW, is_enable);
 			}
 
 			//”アイコンで表示する”項目の有効・無効判別。以前にアイコン表示になっていたかどうか判別。
 			if (IsIconic())
 			{
-				popup->EnableMenuItem(ID_APP_ICON, is_disable);
+				if (m_b_is_hide == TRUE)
+				{
+					pPopup->EnableMenuItem(IDM_APP_ICON, is_enable);
+				}
+				else
+				{
+					pPopup->EnableMenuItem(IDM_APP_ICON, is_disable);
+				}
 			}
 			else
 			{
-				popup->EnableMenuItem(ID_APP_ICON, is_enable);
+				pPopup->EnableMenuItem(IDM_APP_ICON, is_enable);
 			}
 
 			//”起動”を有効にするかどうか判別
-			if (m_ctlImgCtl_Powerlamp.IsLampOn())
+			if (m_ctlImgCtl_lamp.IsLampOn())
 			{
-				popup->EnableMenuItem(ID_TARGET_START_UP, is_disable);
+				pPopup->EnableMenuItem(IDM_TARGET_START_UP, is_disable);
 			}
 			else
 			{
-				popup->EnableMenuItem(ID_TARGET_START_UP, is_enable);
+				pPopup->EnableMenuItem(IDM_TARGET_START_UP, is_enable);
 			}
 			
 			//”セーブ”項目を有効にするかどうか判別
-			if (!m_ctlBtn_save.EnableWindow())//直前有効なら０。無効なら０以外。
+			if (!m_ctlBn_save.EnableWindow())//直前有効なら０。無効なら０以外。
 			{
-				popup->EnableMenuItem(ID_MENU_SAVE, is_enable);
-				m_ctlBtn_save.EnableWindow(TRUE);
+				pPopup->EnableMenuItem(IDM_MENU_SAVE, is_enable);
+				m_ctlBn_save.EnableWindow(TRUE);
 			}
 			else
 			{
-				popup->EnableMenuItem(ID_MENU_SAVE, is_disable);
-				m_ctlBtn_save.EnableWindow(FALSE);
+				pPopup->EnableMenuItem(IDM_MENU_SAVE, is_disable);
+				m_ctlBn_save.EnableWindow(FALSE);
 			}
 
+			//”タスクトレイに入れる”項目を有効にするかどうか判別
+			if (!m_b_is_hide)//::EnableWindow()直前有効なら０。無効なら０以外。
+			{
+				pPopup->EnableMenuItem(IDM_GO_TASKTRAY, is_enable);
+			}
+			else
+			{
+				pPopup->EnableMenuItem(IDM_GO_TASKTRAY, is_disable);
+			}
 			SetForegroundWindow();
 			POINT pt;
 			GetCursorPos(&pt);
-			popup->TrackPopupMenu(TPM_RIGHTBUTTON, pt.x, pt.y, this);
+			pPopup->TrackPopupMenu(TPM_RIGHTBUTTON, pt.x, pt.y, this);
 			menu.DestroyMenu();
 		}
 	default:
@@ -640,7 +648,7 @@ void CAPMSUSPENDDlg::OnDestroy()
 
 void CAPMSUSPENDDlg::OnAppShow()
 {
-	m_b_IsHide = false;
+	m_b_is_hide = false;
 	ShowWindow(SW_NORMAL);
 	SetForegroundWindow();
 	SetFocus();
@@ -649,26 +657,32 @@ void CAPMSUSPENDDlg::OnAppShow()
 
 void CAPMSUSPENDDlg::OnAppIcon()
 {
-	m_b_IsHide = false;
+	m_b_is_hide = false;
 	ShowWindow(SW_MINIMIZE);
+}
+
+
+void CAPMSUSPENDDlg::OnGoTasktray()
+{
+	OnBnClickedGoTasktray();
 }
 
 
 void CAPMSUSPENDDlg::OnTargetSetPath()
 {
-	OnBnClickedButtonGetPath();
+	OnBnClickedGetPath();
 }
 
 
 void CAPMSUSPENDDlg::OnTargetStartUp()
 {
-	OnBnClickedButtonCreateProcess();
+	OnBnClickedCreateProcess();
 }
 
 
 void CAPMSUSPENDDlg::OnTargetClose()
 {
-	OnBnClickedButtonCloseProcess();
+	OnBnClickedCloseProcess();
 }
 
 
@@ -678,38 +692,34 @@ void CAPMSUSPENDDlg::OnBnClickedOk()
 }
 
 
-void CAPMSUSPENDDlg::OnClickedCheckUseTaskTray()
+void CAPMSUSPENDDlg::OnBnClickedCheckUseTaskTray()
 {
 	if (m_ctlChk_use_tasktray.GetCheck())
 	{
 		TrayNotifyIcon(NIM_ADD);
+		m_ctlBn_do_tasktray.EnableWindow(TRUE);
+		m_ctlRdb_show_tasktray_mainDlg.EnableWindow(TRUE);
 	}
 	else
 	{
 		TrayNotifyIcon(NIM_DELETE);
+		m_ctlBn_do_tasktray.EnableWindow(FALSE);
+		MainDlgRdbSetCheck(0);
+		m_ctlRdb_show_tasktray_mainDlg.EnableWindow(FALSE);
 	}
-	if (m_b_use_task_tray != m_ctlChk_use_tasktray.GetCheck())
-	{
-		m_ctlBtn_save.EnableWindow(TRUE);
-	}
-	else
-	{
-		m_ctlBtn_save.EnableWindow(FALSE);
-	}
+	DoChangeSaveBtn();
 }
 
 
-void CAPMSUSPENDDlg::OnBnClickedButtonDoTasktray()
+void CAPMSUSPENDDlg::OnBnClickedGoTasktray()
 {
-//タスクトレイを使用するときは、”タスクトレイを使用する”のチェックが入った状態にする。
-//疑似的にチェックボタンが押されてクリックメッセージが届いた様にする。
 	if (!m_ctlChk_use_tasktray.GetCheck())
 	{
 		m_ctlChk_use_tasktray.SetCheck(TRUE);
-		OnClickedCheckUseTaskTray();
+		OnBnClickedCheckUseTaskTray();
 	}
 	
-	m_b_IsHide = 1;
+	m_b_is_hide = 1;
 	ShowWindow(SW_HIDE);
 }
 
@@ -734,13 +744,13 @@ void CAPMSUSPENDDlg::Dump(CDumpContext& dc) const
 }
 
 
-void CAPMSUSPENDDlg::OnBnClickedButtonTestSuspend()
+void CAPMSUSPENDDlg::OnBnClickedTestSuspend()
 {
 	PostMessage(WM_POWERBROADCAST, PBT_APMSUSPEND, NULL);
 }
 
 
-void CAPMSUSPENDDlg::OnBnClickedButtonTestResume()
+void CAPMSUSPENDDlg::OnBnClickedTestResume()
 {
 	PostMessage(WM_POWERBROADCAST, PBT_APMRESUMESUSPEND, NULL);
 }
@@ -748,14 +758,7 @@ void CAPMSUSPENDDlg::OnBnClickedButtonTestResume()
 
 void CAPMSUSPENDDlg::OnBnClickedCheckRestorePreviousStartup()
 {
-	if (m_ctlChk_restre_prev_startup_state.GetCheck() != m_b_restore_prev_target_startup_state)
-	{
-		m_ctlBtn_save.EnableWindow(TRUE);
-	}
-	else
-	{
-		m_ctlBtn_save.EnableWindow(FALSE);
-	}
+	DoChangeSaveBtn();
 }
 
 
@@ -766,7 +769,7 @@ void CAPMSUSPENDDlg::OnClose()
 }
 
 
-void CAPMSUSPENDDlg::OnBnClickedButtonOpenAdvancedSettingDlg()
+void CAPMSUSPENDDlg::OnBnClickedOpenAdvancedSettingDlg()
 {
 	CAdvacedSettingDlg* pDlg = new CAdvacedSettingDlg(this);
 	pDlg->m_resume_wait_time = m_i_resume_wait_time;
@@ -779,16 +782,16 @@ void CAPMSUSPENDDlg::OnBnClickedButtonOpenAdvancedSettingDlg()
 	return;
 }
 
-void CAPMSUSPENDDlg::OnBnClickedButtonSave()
+void CAPMSUSPENDDlg::OnBnClickedSave()
 {
-	m_ctlBtn_save.EnableWindow(FALSE);
+	m_ctlBn_save.EnableWindow(FALSE);
 	UpdateData(TRUE);
 }
 
 
 void CAPMSUSPENDDlg::OnMenuSave()
 {
-	OnBnClickedButtonSave();
+	OnBnClickedSave();
 }
 
 
@@ -827,50 +830,130 @@ BOOL CAPMSUSPENDDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 
 void CAPMSUSPENDDlg::OnBnClickedRadioShowWindow()
 {
-	if(m_i_show_maindlg_state != 0)
-	{
-		m_ctlBtn_save.EnableWindow(TRUE);
-	}
-	else
-	{
-		m_ctlBtn_save.EnableWindow(FALSE);
-	}
+	MainDlgRdbSetCheck(0);
+	DoChangeSaveBtn();
 }
 
 void CAPMSUSPENDDlg::OnBnClickedRadioShowIcon()
 {
-	if (m_i_show_maindlg_state != 1)
-	{
-		m_ctlBtn_save.EnableWindow(TRUE);
-	}
-	else
-	{
-		m_ctlBtn_save.EnableWindow(FALSE);
-	}
+	MainDlgRdbSetCheck(1);
+	DoChangeSaveBtn();
 }
 
 void CAPMSUSPENDDlg::OnBnClickedRadioShowTasktray()
 {
-	if (m_i_show_maindlg_state != 2)
-	{
-		m_ctlBtn_save.EnableWindow(TRUE);
-	}
-	else
-	{
-		m_ctlBtn_save.EnableWindow(FALSE);
-	}
+	MainDlgRdbSetCheck(2);
+	DoChangeSaveBtn();
 }
 
 
 void CAPMSUSPENDDlg::OnClickedCheckTargetSupportOn()
 {
-	if (m_b_safe_suspend_support_on != m_ctlChk_safe_suspend_suport_on.GetCheck())
+	DoChangeSaveBtn();
+}
+
+
+//設定が変わったら”設定保存”ボタンを有効にする
+int CAPMSUSPENDDlg::DoChangeSaveBtn()
+{
+	int	judge = 0;
+	CString str_path;
+	m_ctlStc_target_path.GetWindowTextW(str_path);
+
+	judge |= !(m_str_target_path == str_path);
+	judge |= !(m_b_restore_Prev_target_startup_state == m_ctlChk_restre_Prev_startup_state.GetCheck());
+	judge |= !(m_b_safe_suspend_support_on == m_ctlChk_safe_suspend_suport_on.GetCheck());
+	judge |= !(m_b_use_task_tray == m_ctlChk_use_tasktray.GetCheck());
+
+	if (m_i_show_mainDlg_state !=MainDlgRdbGetCheck())
 	{
-		m_ctlBtn_save.EnableWindow(TRUE);
+		judge |= 1;
+	}
+	if (judge)
+	{
+		m_ctlBn_save.EnableWindow(TRUE);
 	}
 	else
 	{
-		m_ctlBtn_save.EnableWindow(FALSE);
+		m_ctlBn_save.EnableWindow(FALSE);
 	}
+
+	return judge;
 }
 
+//ラジオボタンの挙動を手動で設定する
+//DoDataExchangeの中にも記述し、連動するようにする。
+int CAPMSUSPENDDlg::UpdateRdbData(BOOL True_down)
+{
+	int ret;
+	if (True_down!=0)
+	{
+		if (m_ctlRdb_mainDlg_showis.GetCheck()== BST_CHECKED)
+		{
+			m_ctlRdb_show_icon_maindlg.SetCheck(BST_UNCHECKED);
+			m_ctlRdb_show_tasktray_mainDlg.SetCheck(BST_UNCHECKED);
+			m_i_show_mainDlg_state = 0;
+			ret = 0;
+		}
+		else if (m_ctlRdb_show_icon_maindlg.GetCheck()== BST_CHECKED)
+		{
+			m_ctlRdb_mainDlg_showis.SetCheck(BST_UNCHECKED);
+			m_ctlRdb_show_tasktray_mainDlg.SetCheck(BST_UNCHECKED);
+			m_i_show_mainDlg_state = 1;
+			ret = 1;
+		}
+		else
+		{
+			m_ctlRdb_mainDlg_showis.SetCheck(BST_UNCHECKED);
+			m_ctlRdb_show_icon_maindlg.SetCheck(BST_UNCHECKED);
+			m_ctlRdb_show_tasktray_mainDlg.SetCheck(BST_CHECKED);
+			m_i_show_mainDlg_state = 2;
+			ret = 2;
+		}
+	}
+	else
+	{
+		MainDlgRdbSetCheck(m_i_show_mainDlg_state);
+	}
+	return -1;
+}
+
+
+int CAPMSUSPENDDlg::MainDlgRdbSetCheck(int bn)
+{
+	switch (bn)
+	{
+	case 0:
+		m_ctlRdb_mainDlg_showis.SetCheck(BST_CHECKED);
+		m_ctlRdb_show_icon_maindlg.SetCheck(BST_UNCHECKED);
+		m_ctlRdb_show_tasktray_mainDlg.SetCheck(BST_UNCHECKED);
+		break;
+
+	case 1:
+		m_ctlRdb_mainDlg_showis.SetCheck(BST_UNCHECKED);
+		m_ctlRdb_show_icon_maindlg.SetCheck(BST_CHECKED);
+		m_ctlRdb_show_tasktray_mainDlg.SetCheck(BST_UNCHECKED);
+		break;
+
+	case 2:
+		m_ctlRdb_mainDlg_showis.SetCheck(BST_UNCHECKED);
+		m_ctlRdb_show_icon_maindlg.SetCheck(BST_UNCHECKED);
+		m_ctlRdb_show_tasktray_mainDlg.SetCheck(BST_CHECKED);
+		break;
+
+	}
+
+	return bn;
+}
+
+
+int CAPMSUSPENDDlg::MainDlgRdbGetCheck()
+{
+		if (m_ctlRdb_mainDlg_showis.GetCheck() == BST_CHECKED)
+			return 0;
+		if (m_ctlRdb_show_icon_maindlg.GetCheck() == BST_CHECKED)
+			return 1;
+		if (m_ctlRdb_show_tasktray_mainDlg.GetCheck() == BST_CHECKED)
+			return 2;
+	return -1;
+}
