@@ -25,10 +25,9 @@ public:
 	BOOL LampOn(BOOL b);
 	BOOL IsLampOn();
 	BOOL operator =(BOOL b);
-	BOOL operator =(CStaticBmpControl  c);
 
 protected:
 	BOOL m_is_lamp;
+
+
 };
-
-

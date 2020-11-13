@@ -123,6 +123,7 @@ CAPMSUSPENDDlg::CAPMSUSPENDDlg(CWnd* pParent /*=nullptr*/)
 	m_b_Target_had_startup = 0;
 	m_i_resume_wait_time = 0;
 	m_i_show_mainDlg_state = 0;
+
 }
 CAPMSUSPENDDlg::~CAPMSUSPENDDlg() {
 
@@ -534,10 +535,19 @@ afx_msg LRESULT CAPMSUSPENDDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_RBUTTONDOWN:
+
 		if (wParam == IDR_MAINFRAME) {
+
+//			GetDlgItem(IDR_MENU_MAIN)->SetFont(&m_midiumFont);
+			
 			CMenu menu;
+			CCtmSubMenu Submenu;
 			menu.LoadMenu(IDR_MENU_MAIN);
-			CMenu* pPopup = menu.GetSubMenu(0);
+			CMenu* pmenu = menu.GetSubMenu(0);
+			HMENU h = pmenu->Detach();
+			Submenu.Attach(h);
+			
+			CCtmSubMenu* pPopup = &Submenu;
 			UINT is_enable = MF_BYCOMMAND | MF_ENABLED;
 			UINT is_disable= MF_BYCOMMAND | MF_DISABLED | MF_GRAYED;
 			
@@ -611,6 +621,7 @@ afx_msg LRESULT CAPMSUSPENDDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 			POINT pt;
 			GetCursorPos(&pt);
 			pPopup->TrackPopupMenu(TPM_RIGHTBUTTON, pt.x, pt.y, this);
+			pPopup->Detach();
 			menu.DestroyMenu();
 		}
 	default:

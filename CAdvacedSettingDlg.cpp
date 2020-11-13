@@ -64,9 +64,9 @@ void CAdvacedSettingDlg::OnClickedButtonSleepIncrease()
 	m_ctlEdit_resume_wait_time.GetWindowText(str);
 	int i = _ttoi(str);
 	i += 1000;
-	if (i > 9000)
+	if (i > 100000)
 	{
-		i = 9000;
+		i = 99999;
 	}
 	str.Format(_T("%d"), i);
 	m_ctlEdit_resume_wait_time.SetWindowText(str);
@@ -105,7 +105,7 @@ BOOL CAdvacedSettingDlg::OnInitDialog()
 	curFont = m_ctlEdit_resume_wait_time.GetFont();
 	curFont->GetLogFont(&mylf);
 	mylf.lfHeight = size.cy;
-	mylf.lfWidth = size.cx/5;
+	mylf.lfWidth = size.cx/6;
 	mylf.lfWeight = FW_HEAVY;
 	m_newFont = new CFont;
 	m_newFont->CreateFontIndirect(&mylf);

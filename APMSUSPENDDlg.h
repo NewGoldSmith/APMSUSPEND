@@ -7,6 +7,7 @@
 #include "CStaticBmpControl.h"
 #include "CAdvacedSettingDlg.h"
 #include <atlpath.h>
+#include "CCtmMenu.h"
 
 #define WM_TASKTRAY     WM_USER + 1 
 

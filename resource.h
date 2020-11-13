@@ -12,6 +12,7 @@
 #define IDB_BITMAP_MASK                 143
 #define IDB_BITMAP_POWER_ON_LAMP        150
 #define IDD_ADVANCED_SETTING            151
+#define IDB_BITMAP1                     156
 #define IDC_BUTTON_OPEN_PATH            1000
 #define IDC_BUTTON_CREATE_PROCESS       1001
 #define IDC_BUTTON_CLOSE_PROCESS        1002
@@ -60,7 +61,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        156
+#define _APS_NEXT_RESOURCE_VALUE        157
 #define _APS_NEXT_COMMAND_VALUE         32806
 #define _APS_NEXT_CONTROL_VALUE         1052
 #define _APS_NEXT_SYMED_VALUE           110

@@ -115,14 +115,3 @@ BOOL CStaticBmpControl::operator =(BOOL b)
 	return m_is_lamp;
 }
 
-BOOL CStaticBmpControl::operator =(CStaticBmpControl c)
-{
-	m_is_lamp = c.m_is_lamp;
-	if (IsWindow(*this))
-	{
-		Invalidate();
-		UpdateWindow();
-	}
-	return m_is_lamp;
-}
-
