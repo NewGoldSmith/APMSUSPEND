@@ -23,40 +23,33 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	afx_msg void OnClickedButtonSleepIncrease();
-	afx_msg void OnClickedButtonSleepDecease();
 	int m_resume_wait_time;
-	virtual BOOL OnInitDialog();
 protected:
-	CFont* m_newFont;
-public:
-	afx_msg void OnDestroy();
-	CEdit m_ctlEdit_resume_wait_time;
-	afx_msg void OnBnClickedButtonCreateShortcutStartup();
-	afx_msg void OnBnClickedButtonDeleteShortcutStartup();
 	afx_msg void OnBnClickedButtonCreateShortcutDesktop();
-	afx_msg void OnBnClickedButtonDeleteShortcutDesktop();
 	afx_msg void OnBnClickedButtonCreateShortcutStartmenu();
+	afx_msg void OnBnClickedButtonCreateShortcutStartup();
+	afx_msg void OnBnClickedButtonDeleteShortcutDesktop();
 	afx_msg void OnBnClickedButtonDeleteShortcutStartmenu();
-protected:
-	void DeleteLink(int csidl);
-	void MoveLink(int csidlDest, int csidlSource);
+	afx_msg void OnBnClickedButtonDeleteShortcutStartup();
+	afx_msg void OnClickedButtonSleepDecease();
+	afx_msg void OnClickedButtonSleepIncrease();
+	afx_msg void OnDestroy();
 	bool FindLink(int csidlPath);
-	void GetLinkPathName(int csidlPath, LPTSTR pszPathName);
-
-	void CreateShortCut(int csidl);
-	CStaticBmpControl m_ctlImgctl_Exist_Link_Desktop;
-	CStaticBmpControl m_ctlImgctl_Exist_Link_Menu;
-	CStaticBmpControl m_ctlImgctl_Exist_Link_Startup;
-private:
-	void Update_Lamp();
-protected:
 	CButton m_ctlBtn_create_shortcut_desktop;
-public:
 	CButton m_ctlBtn_create_shortcut_menu;
 	CButton m_ctlBtn_create_shortcut_startup;
 	CButton m_ctlBtn_delete_shortcut_desktop;
 	CButton m_ctlBtn_delete_shortcut_menu;
 	CButton m_ctlBtn_delete_shortcut_startup;
+	CEdit m_ctlEdit_resume_wait_time;
+	CFont* m_newFont;
+	CStaticBmpControl m_ctlImgctl_Exist_Link_Desktop;
+	CStaticBmpControl m_ctlImgctl_Exist_Link_Menu;
+	CStaticBmpControl m_ctlImgctl_Exist_Link_Startup;
+	virtual BOOL OnInitDialog();
+	void CreateShortCut(int csidl);
+	void DeleteLink(int csidl);
+	void GetLinkPathName(int csidlPath, LPTSTR pszPathName);
+	void Update_Lamp();
 
 };

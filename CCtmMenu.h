@@ -9,10 +9,10 @@ class CCtmSubMenu : public CMenu
 public:
 	CCtmSubMenu();
 	virtual ~CCtmSubMenu();
-	virtual void MeasureItem(LPMEASUREITEMSTRUCT /*lpMeasureItemStruct*/);
-	virtual void DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
 	BOOL Attach(HMENU hMenu);
 protected:
+	virtual void MeasureItem(LPMEASUREITEMSTRUCT /*lpMeasureItemStruct*/);
+	virtual void DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
 	CFont m_smallFont;          // 追加します。
 	CFont m_midiumFont;         // 追加します。
 	CFont m_largeFont;          // 追加します。

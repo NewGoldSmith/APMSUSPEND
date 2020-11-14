@@ -24,7 +24,6 @@ BEGIN_MESSAGE_MAP(CStaticBmpControl, CStatic)
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
 	ON_WM_LBUTTONDOWN()
-	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -38,12 +37,10 @@ void CStaticBmpControl::OnDestroy()
 {
 	CStatic::OnDestroy();
 
-	// TODO: ここにメッセージ ハンドラー コードを追加します。
 }
 
 void CStaticBmpControl::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO: ここにメッセージ ハンドラー コードを追加するか、既定の処理を呼び出します。
 
 	CStatic::OnLButtonDown(nFlags, point);
 }

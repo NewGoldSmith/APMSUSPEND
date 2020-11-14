@@ -31,7 +31,6 @@ public:
 	DECLARE_MESSAGE_MAP()
 protected:
 //	LPTSTR* m_pProfileName;
-private:
 	HANDLE m_hMutex;
 public:
 	virtual int ExitInstance();

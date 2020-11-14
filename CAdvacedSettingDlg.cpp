@@ -181,18 +181,6 @@ void CAdvacedSettingDlg::GetLinkPathName(int csidlPath, LPTSTR pszPathName)
 }
 
 
-void CAdvacedSettingDlg::MoveLink(int csidlSource, int csidlDest)
-{
-	TCHAR	szSourceLinkPathName[_MAX_PATH];
-	TCHAR	szDestLinkPathName[_MAX_PATH];
-	//ソース側リンクパスネーム取得
-	GetLinkPathName(csidlSource, szSourceLinkPathName);
-	//送り先側リンクパスネーム取得
-	GetLinkPathName(csidlDest, szDestLinkPathName);
-	MoveFile(szSourceLinkPathName, szDestLinkPathName);
-}
-
-
 void CAdvacedSettingDlg::DeleteLink(int csidl)
 {
 	TCHAR	szLinkPathName[_MAX_PATH];

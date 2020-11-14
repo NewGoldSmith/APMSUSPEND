@@ -143,6 +143,5 @@ int CAPMSUSPENDApp::ExitInstance()
 	// Mutexの所有権を解放する。
 	ReleaseMutex(m_hMutex);
 	CloseHandle(m_hMutex);
-
 	return CWinApp::ExitInstance();
 }

@@ -56,7 +56,6 @@ void CCtmSubMenu::DrawItem(LPDRAWITEMSTRUCT lpDIS/*lpDrawItemStruct*/)
 
 	if (!(lpDIS->CtlType == ODT_MENU))
 	{
-		CMenu::DrawItem(lpDIS);
 		return;
 	}
 
@@ -91,7 +90,8 @@ void CCtmSubMenu::DrawItem(LPDRAWITEMSTRUCT lpDIS/*lpDrawItemStruct*/)
 		}
 		return;
 	}
-//メニュー項目が選択から外れていった後の処理
+
+	//メニュー項目が選択から外れていった後の処理
 	if (!(lpDIS->itemState & ODS_SELECTED) &&
 		(lpDIS->itemAction & ODA_SELECT))
 	{
@@ -108,23 +108,25 @@ void CCtmSubMenu::DrawItem(LPDRAWITEMSTRUCT lpDIS/*lpDrawItemStruct*/)
 	}
 }
 
+//メニューの描画。同じような処理があるので、CCtmSubMenu::DrawItemから切り離した。
+//無効、選択、非選択の描画をする。
 void CCtmSubMenu::DrawMenuItem(LPDRAWITEMSTRUCT lpDIS, UINT itemState)
 {
 	CBrush	brMenu,			//メニューの背景色
 //		brMenuText,			//メニュー内のテキストの色
 	brHighLight,		//選択された時の背景色
-	brHighLightText,	//選択された時のテキスト色
-//		brGrayText,			//無効のテキスト色
-//		brActiveBorder,		//アクティブなウインドウの境界色
-//		brInActiveBorder,	//非アクティブなウインドウの境界色
+//	brHighLightText,	//選択された時のテキスト色
+//	brGrayText,			//無効のテキスト色
+	brActiveBorder,		//アクティブなウインドウの境界色
+//	brInActiveBorder,	//非アクティブなウインドウの境界色
 	brMenuHighLight;	//ハイライトされたメニューアイテムの色
-//		brMenuBar;			//メニューバーの色
+//	brMenuBar;			//メニューバーの色
 	VERIFY(brMenu.CreateSysColorBrush(COLOR_MENU) != 0);
 //	VERIFY(brMenuText.CreateSysColorBrush(COLOR_MENUTEXT) != 0);
 	VERIFY(brHighLight.CreateSysColorBrush(COLOR_HIGHLIGHT) != 0);
 //	VERIFY(brHighLightText.CreateSysColorBrush(COLOR_HIGHLIGHTTEXT) != 0);
 //	VERIFY(brGrayText.CreateSysColorBrush(COLOR_GRAYTEXT) != 0);
-//	VERIFY(brActiveBorder.CreateSysColorBrush(COLOR_ACTIVEBORDER) != 0);
+	VERIFY(brActiveBorder.CreateSysColorBrush(COLOR_ACTIVEBORDER) != 0);
 //	VERIFY(brInActiveBorder.CreateSysColorBrush(COLOR_INACTIVEBORDER) != 0);
 	VERIFY(brMenuHighLight.CreateSysColorBrush(COLOR_MENUHILIGHT) != 0);
 //	VERIFY(brMenuBar.CreateSysColorBrush(COLOR_MENUBAR) != 0);
@@ -138,6 +140,7 @@ void CCtmSubMenu::DrawMenuItem(LPDRAWITEMSTRUCT lpDIS, UINT itemState)
 	ColMenuHighLight = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	CString str;
 
+//無効の描画
 	if (itemState & ODS_DISABLED)
 	{
 		pDC->FillRect(&lpDIS->rcItem, &brMenu);
@@ -147,6 +150,7 @@ void CCtmSubMenu::DrawMenuItem(LPDRAWITEMSTRUCT lpDIS, UINT itemState)
 		return;
 	}
 
+	//マウスカーソルが上に無い時の描画
 	if (itemState & ODS_NOFOCUSRECT)
 	{
 		pDC->FillRect(&lpDIS->rcItem, &brMenu);
@@ -157,10 +161,11 @@ void CCtmSubMenu::DrawMenuItem(LPDRAWITEMSTRUCT lpDIS, UINT itemState)
 		return;
 	}
  
+//マウスカーソルが上に来た時の描画
 	if (itemState & ODS_SELECTED)
 	{
-		pDC->FillRect(&lpDIS->rcItem, &brMenuHighLight);
-		pDC->FrameRect(&lpDIS->rcItem, &brMenuHighLight);
+		pDC->FillRect(&lpDIS->rcItem, &brHighLight);
+		pDC->FrameRect(&lpDIS->rcItem, &brActiveBorder);
 		CMenu::GetMenuString(lpDIS->itemID, str, MF_BYCOMMAND);
 		pDC->SetTextColor(ColMenuHighLight);
 		pDC->TextOutW(lpDIS->rcItem.left, lpDIS->rcItem.top, str);
@@ -198,6 +203,8 @@ BOOL CCtmSubMenu::Attach(HMENU hMenu)
 	mdc.SelectObject(m_largeFont);
 			
 	BOOL b=CMenu::Attach(hMenu);
+
+//メニューの全ての項目テキストから、横幅、高さが最大の物を調べ、メニュー項目の大きさを決める
 	int j = GetMenuItemCount();
 	int i = 0;
 	for ( i; i <j ; ++i)
@@ -209,9 +216,6 @@ BOOL CCtmSubMenu::Attach(HMENU hMenu)
 		if (Mii.fType != MFT_STRING)
 		{
 			TRACE(_T("\r\nCCtmSubMenu::Attach --------------------------------------------\r\n"));
-			//Mii.fMask = MIIM_DATA;
-			//Mii.dwItemData = -1;
-			//SetMenuItemInfo(i, &Mii, TRUE);
 			continue;
 		}
 		TRACE(_T("\r\nCCtmSubMenu::Attach str %s,wID %d\r\n"), str,Mii.wID);

@@ -133,61 +133,61 @@ void CAPMSUSPENDDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 
-	DDX_Text(pDX, IDC_STATIC_TARGET_PATH, m_str_target_path);
-	DDX_Check(pDX, IDC_CHECK_TARGET_SUPPORT_ON, m_b_safe_suspend_support_on);
 	DDX_Check(pDX, IDC_CHECK_RESTORE_PREVIOUS_STARTUP, m_b_restore_Prev_target_startup_state);
+	DDX_Check(pDX, IDC_CHECK_TARGET_SUPPORT_ON, m_b_safe_suspend_support_on);
 	DDX_Check(pDX, IDC_CHECK_USE_TASK_TRAY, m_b_use_task_tray);
-	DDX_Control(pDX, IDC_CHECK_USE_TASK_TRAY, m_ctlChk_use_tasktray);
-	DDX_Control(pDX, IDC_CHECK_TARGET_SUPPORT_ON, m_ctlChk_safe_suspend_suport_on);
-	DDX_Control(pDX, IDC_STATIC_TARGET_PATH, m_ctlStc_target_path);
 	DDX_Control(pDX, IDC_BUTTON_CREATE_PROCESS, m_ctlBtn_create_process);
+	DDX_Control(pDX, IDC_BUTTON_GO_TASKTRAY, m_ctlBn_do_tasktray);
+	DDX_Control(pDX, IDC_BUTTON_SAVE, m_ctlBn_save);
 	DDX_Control(pDX, IDC_BUTTON_TEST_RESUME, m_ctlBtn_test_resume);
 	DDX_Control(pDX, IDC_BUTTON_TEST_SUSPEND, m_ctlBtn_test_suspend);
-	DDX_Control(pDX, IDC_BUTTON_SAVE, m_ctlBn_save);
-	DDX_Control(pDX, IDCANCEL, m_ctlBtn_cancel);
-	DDX_Control(pDX, IDC_RADIO_SHOW_WINDOW_MAIN_STARTUP, m_ctlRdb_mainDlg_showis);
 	DDX_Control(pDX, IDC_CHECK_RESTORE_PREVIOUS_STARTUP, m_ctlChk_restre_Prev_startup_state);
+	DDX_Control(pDX, IDC_CHECK_TARGET_SUPPORT_ON, m_ctlChk_safe_suspend_suport_on);
+	DDX_Control(pDX, IDC_CHECK_USE_TASK_TRAY, m_ctlChk_use_tasktray);
 	DDX_Control(pDX, IDC_RADIO_SHOW_ICON_MAIN_STARTUP, m_ctlRdb_show_icon_maindlg);
 	DDX_Control(pDX, IDC_RADIO_SHOW_TASKTRAY_MAIN_STARTUP, m_ctlRdb_show_tasktray_mainDlg);
-	DDX_Control(pDX, IDC_BUTTON_GO_TASKTRAY, m_ctlBn_do_tasktray);
+	DDX_Control(pDX, IDC_RADIO_SHOW_WINDOW_MAIN_STARTUP, m_ctlRdb_mainDlg_showis);
+	DDX_Control(pDX, IDC_STATIC_TARGET_PATH, m_ctlStc_target_path);
+	DDX_Control(pDX, IDCANCEL, m_ctlBtn_cancel);
+	DDX_Text(pDX, IDC_STATIC_TARGET_PATH, m_str_target_path);
 	UpdateRdbData(pDX->m_bSaveAndValidate);
 
 }
 
 BEGIN_MESSAGE_MAP(CAPMSUSPENDDlg, CDialogEx)
-	ON_WM_SYSCOMMAND()
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
-	ON_WM_POWERBROADCAST()
-	ON_BN_CLICKED(IDC_BUTTON_OPEN_PATH, &CAPMSUSPENDDlg::OnBnClickedGetPath)
-	ON_BN_CLICKED(IDC_BUTTON_CREATE_PROCESS, &CAPMSUSPENDDlg::OnBnClickedCreateProcess)
-	ON_BN_CLICKED(IDC_BUTTON_CLOSE_PROCESS, &CAPMSUSPENDDlg::OnBnClickedCloseProcess)
-	ON_WM_WINDOWPOSCHANGING()
-	ON_MESSAGE(WM_TASKTRAY, &CAPMSUSPENDDlg::OnTasktray)
-	ON_WM_DESTROY()
-	ON_COMMAND(IDM_APP_SHOW, &CAPMSUSPENDDlg::OnAppShow)
-	ON_COMMAND(IDM_APP_ICON, &CAPMSUSPENDDlg::OnAppIcon)
-	ON_COMMAND(IDM_SET_TARGET_PATH, &CAPMSUSPENDDlg::OnTargetSetPath)
-	ON_COMMAND(IDM_TARGET_START_UP, &CAPMSUSPENDDlg::OnTargetStartUp)
-	ON_COMMAND(IDM_TARGET_CLOSE, &CAPMSUSPENDDlg::OnTargetClose)
-	ON_BN_CLICKED(IDOK, &CAPMSUSPENDDlg::OnBnClickedOk)
-	ON_BN_CLICKED(IDC_CHECK_USE_TASK_TRAY, &CAPMSUSPENDDlg::OnBnClickedCheckUseTaskTray)
-	ON_BN_CLICKED(IDC_BUTTON_GO_TASKTRAY, &CAPMSUSPENDDlg::OnBnClickedGoTasktray)
-	ON_BN_CLICKED(IDCANCEL, &CAPMSUSPENDDlg::OnBnClickedCancel)
-	ON_COMMAND(IDM_APP_CANCEL, &CAPMSUSPENDDlg::OnAppCancel)
-	ON_WM_DRAWITEM()
-	ON_BN_CLICKED(IDC_BUTTON_TEST_SUSPEND, &CAPMSUSPENDDlg::OnBnClickedTestSuspend)
-	ON_BN_CLICKED(IDC_BUTTON_TEST_RESUME, &CAPMSUSPENDDlg::OnBnClickedTestResume)
-	ON_BN_CLICKED(IDC_CHECK_RESTORE_PREVIOUS_STARTUP, &CAPMSUSPENDDlg::OnBnClickedCheckRestorePreviousStartup)
-	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON_ADVANCED_OPTION, &CAPMSUSPENDDlg::OnBnClickedOpenAdvancedSettingDlg)
+	ON_BN_CLICKED(IDC_BUTTON_CLOSE_PROCESS, &CAPMSUSPENDDlg::OnBnClickedCloseProcess)
+	ON_BN_CLICKED(IDC_BUTTON_CREATE_PROCESS, &CAPMSUSPENDDlg::OnBnClickedCreateProcess)
+	ON_BN_CLICKED(IDC_BUTTON_GO_TASKTRAY, &CAPMSUSPENDDlg::OnBnClickedGoTasktray)
+	ON_BN_CLICKED(IDC_BUTTON_OPEN_PATH, &CAPMSUSPENDDlg::OnBnClickedGetPath)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CAPMSUSPENDDlg::OnBnClickedSave)
-	ON_COMMAND(IDM_MENU_SAVE, &CAPMSUSPENDDlg::OnMenuSave)
-	ON_BN_CLICKED(IDC_RADIO_SHOW_ICON_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowIcon)
-	ON_BN_CLICKED(IDC_RADIO_SHOW_WINDOW_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowWindow)
-	ON_BN_CLICKED(IDC_RADIO_SHOW_TASKTRAY_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowTasktray)
+	ON_BN_CLICKED(IDC_BUTTON_TEST_RESUME, &CAPMSUSPENDDlg::OnBnClickedTestResume)
+	ON_BN_CLICKED(IDC_BUTTON_TEST_SUSPEND, &CAPMSUSPENDDlg::OnBnClickedTestSuspend)
+	ON_BN_CLICKED(IDC_CHECK_RESTORE_PREVIOUS_STARTUP, &CAPMSUSPENDDlg::OnBnClickedCheckRestorePreviousStartup)
 	ON_BN_CLICKED(IDC_CHECK_TARGET_SUPPORT_ON, &CAPMSUSPENDDlg::OnClickedCheckTargetSupportOn)
+	ON_BN_CLICKED(IDC_CHECK_USE_TASK_TRAY, &CAPMSUSPENDDlg::OnBnClickedCheckUseTaskTray)
+	ON_BN_CLICKED(IDC_RADIO_SHOW_ICON_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowIcon)
+	ON_BN_CLICKED(IDC_RADIO_SHOW_TASKTRAY_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowTasktray)
+	ON_BN_CLICKED(IDC_RADIO_SHOW_WINDOW_MAIN_STARTUP, &CAPMSUSPENDDlg::OnBnClickedRadioShowWindow)
+	ON_BN_CLICKED(IDCANCEL, &CAPMSUSPENDDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDOK, &CAPMSUSPENDDlg::OnBnClickedOk)
+	ON_COMMAND(IDM_APP_CANCEL, &CAPMSUSPENDDlg::OnAppCancel)
+	ON_COMMAND(IDM_APP_ICON, &CAPMSUSPENDDlg::OnAppIcon)
+	ON_COMMAND(IDM_APP_SHOW, &CAPMSUSPENDDlg::OnAppShow)
 	ON_COMMAND(IDM_GO_TASKTRAY, &CAPMSUSPENDDlg::OnGoTasktray)
+	ON_COMMAND(IDM_MENU_SAVE, &CAPMSUSPENDDlg::OnMenuSave)
+	ON_COMMAND(IDM_SET_TARGET_PATH, &CAPMSUSPENDDlg::OnTargetSetPath)
+	ON_COMMAND(IDM_TARGET_CLOSE, &CAPMSUSPENDDlg::OnTargetClose)
+	ON_COMMAND(IDM_TARGET_START_UP, &CAPMSUSPENDDlg::OnTargetStartUp)
+	ON_MESSAGE(WM_TASKTRAY, &CAPMSUSPENDDlg::OnTasktray)
+	ON_WM_CLOSE()
+	ON_WM_DESTROY()
+	ON_WM_DRAWITEM()
+	ON_WM_PAINT()
+	ON_WM_POWERBROADCAST()
+	ON_WM_QUERYDRAGICON()
+	ON_WM_SYSCOMMAND()
+	ON_WM_WINDOWPOSCHANGING()
 END_MESSAGE_MAP()
 
 
@@ -230,17 +230,13 @@ BOOL CAPMSUSPENDDlg::OnInitDialog()
  
 
 	CWinApp* pApp = AfxGetApp();
-	m_str_target_path = pApp->GetProfileString(_T("SYSTEM"), _T("FILE_PATH"), _T("C:\\Program Files (x86)\\radiko_player_air\\radiko_player_air.exe"));
 	m_b_restore_Prev_target_startup_state = pApp->GetProfileInt(_T("SYSTEM"), _T("SAVE_STARTUP_STATUS"), TRUE);
 	m_b_safe_suspend_support_on = pApp->GetProfileInt(_T("SYSTEM"), _T("SAFE_SUSPEND_SUPPORT_ON"), TRUE);
-	m_i_show_mainDlg_state = pApp->GetProfileInt(_T("SYSTEM"), _T("SHOW_DLG_STATE"), 0);
 	m_b_use_task_tray = pApp->GetProfileInt(_T("SYSTEM"), _T("USE_TASK_TRAY"), TRUE);
 	m_ctlImgCtl_lamp = pApp->GetProfileInt(_T("TARGET_APP"), _T("IS_STARTUP"), 0);
 	m_i_resume_wait_time = pApp->GetProfileInt(_T("SYSTEM"), _T("RESUME_WAIT_TIME"), 0);
-	if (m_str_target_path.GetLength()==0)
-	{
-//		m_str_Target_path = _T("C:\\Program Files (x86)\\radiko_player_air\\radiko_player_air.exe");
-	}
+	m_i_show_mainDlg_state = pApp->GetProfileInt(_T("SYSTEM"), _T("SHOW_DLG_STATE"), 0);
+	m_str_target_path = pApp->GetProfileString(_T("SYSTEM"), _T("FILE_PATH"), _T("C:\\Program Files (x86)\\radiko_player_air\\radiko_player_air.exe"));
 
 	UpdateData(FALSE);//iniファイルの内容をコントロール群に反映
 
@@ -403,6 +399,9 @@ void CAPMSUSPENDDlg::OnBnClickedCreateProcess()
 	lock.Unlock();
 	CreateTargetProcess();
 }
+
+
+//ターゲットプロセス起動
 void CAPMSUSPENDDlg::CreateTargetProcess()
 {
 	STARTUPINFO s;
@@ -476,13 +475,13 @@ BOOL CAPMSUSPENDDlg::DestroyWindow()
 	}
 
 	CWinApp* pApp = AfxGetApp();
-	pApp->WriteProfileString(_T("SYSTEM"), _T("FILE_PATH"), m_str_target_path);
-	pApp->WriteProfileInt(_T("SYSTEM"), _T("SAVE_STARTUP_STATUS"), m_b_restore_Prev_target_startup_state);
+	pApp->WriteProfileInt(_T("SYSTEM"), _T("RESUME_WAIT_TIME"), m_i_resume_wait_time);
 	pApp->WriteProfileInt(_T("SYSTEM"), _T("SAFE_SUSPEND_SUPPORT_ON"), m_b_safe_suspend_support_on);
-	pApp->WriteProfileInt(_T("TARGET_APP"), _T("IS_STARTUP"), m_ctlImgCtl_lamp.IsLampOn());
+	pApp->WriteProfileInt(_T("SYSTEM"), _T("SAVE_STARTUP_STATUS"), m_b_restore_Prev_target_startup_state);
 	pApp->WriteProfileInt(_T("SYSTEM"), _T("SHOW_DLG_STATE"), m_i_show_mainDlg_state );
 	pApp->WriteProfileInt(_T("SYSTEM"), _T("USE_TASK_TRAY"), m_b_use_task_tray);
-	pApp->WriteProfileInt(_T("SYSTEM"), _T("RESUME_WAIT_TIME"), m_i_resume_wait_time);
+	pApp->WriteProfileInt(_T("TARGET_APP"), _T("IS_STARTUP"), m_ctlImgCtl_lamp.IsLampOn());
+	pApp->WriteProfileString(_T("SYSTEM"), _T("FILE_PATH"), m_str_target_path);
 
 //ターゲットプロセスを探し出し、閉じるメッセージを送る
 	EnumWindows((WNDENUMPROC)EnumWindowsProc, (LPARAM)&m_PI);
@@ -538,16 +537,12 @@ afx_msg LRESULT CAPMSUSPENDDlg::OnTasktray(WPARAM wParam, LPARAM lParam)
 
 		if (wParam == IDR_MAINFRAME) {
 
-//			GetDlgItem(IDR_MENU_MAIN)->SetFont(&m_midiumFont);
-			
 			CMenu menu;
 			CCtmSubMenu Submenu;
 			menu.LoadMenu(IDR_MENU_MAIN);
-			CMenu* pmenu = menu.GetSubMenu(0);
-			HMENU h = pmenu->Detach();
-			Submenu.Attach(h);
+			Submenu.Attach(menu.GetSubMenu(0)->GetSafeHmenu());
+			CMenu* pPopup = &Submenu;
 			
-			CCtmSubMenu* pPopup = &Submenu;
 			UINT is_enable = MF_BYCOMMAND | MF_ENABLED;
 			UINT is_disable= MF_BYCOMMAND | MF_DISABLED | MF_GRAYED;
 			
@@ -892,7 +887,7 @@ int CAPMSUSPENDDlg::DoChangeSaveBtn()
 	return judge;
 }
 
-//ラジオボタンの挙動を手動で設定する
+//クリック時に即時反応する為に、ラジオボタンの挙動を手動で設定する。
 //DoDataExchangeの中にも記述し、連動するようにする。
 int CAPMSUSPENDDlg::UpdateRdbData(BOOL True_down)
 {
