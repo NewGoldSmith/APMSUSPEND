@@ -62,9 +62,6 @@
     <ClCompile Include="CCtmMenu.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="..\ctrltest\custmenu.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="APMSUSPEND.rc">
